@@ -122,9 +122,10 @@ export default function MessageBoard() {
   const messages = data?.pages.flat() || [];
 
   // Infinite scroll with intersection observer
-  const loadMoreRef = useCallback((node: HTMLDivElement | null) => {
-    if (isLoading || isFetchingNextPage) return;
-    if (!node) return;
+  const [loadMoreElement, setLoadMoreElement] = useState<HTMLDivElement | null>(null);
+  
+  useEffect(() => {
+    if (!loadMoreElement || isLoading || isFetchingNextPage || !hasNextPage) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -135,9 +136,9 @@ export default function MessageBoard() {
       { threshold: 0.1 }
     );
 
-    observer.observe(node);
+    observer.observe(loadMoreElement);
     return () => observer.disconnect();
-  }, [isLoading, isFetchingNextPage, hasNextPage, fetchNextPage]);
+  }, [loadMoreElement, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage]);
 
   // Submit new message
   const submitMessageMutation = useMutation({
@@ -321,7 +322,7 @@ export default function MessageBoard() {
               {/* Infinite scroll trigger */}
               {hasNextPage && (
                 <div 
-                  ref={loadMoreRef}
+                  ref={setLoadMoreElement}
                   className="flex justify-center py-8"
                 >
                   {isFetchingNextPage ? (
