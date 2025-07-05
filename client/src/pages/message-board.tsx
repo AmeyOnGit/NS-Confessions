@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { 
   Select,
@@ -68,6 +68,7 @@ export default function MessageBoard() {
       switch (data.type) {
         case 'new_message':
           queryClient.invalidateQueries({ queryKey: ['/api/messages', sortBy] });
+          queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
           toast({
             title: "New Message",
             description: "A new anonymous message was posted",
@@ -75,12 +76,14 @@ export default function MessageBoard() {
           break;
         case 'message_liked':
           queryClient.invalidateQueries({ queryKey: ['/api/messages', sortBy] });
+          queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
           break;
         case 'new_comment':
         case 'comment_liked':
         case 'message_deleted':
         case 'comment_deleted':
           queryClient.invalidateQueries({ queryKey: ['/api/messages', sortBy] });
+          queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
           break;
       }
     });
@@ -121,10 +124,16 @@ export default function MessageBoard() {
   // Flatten all pages into a single array of messages
   const messages = data?.pages.flat() || [];
   
-  // Calculate total messages and comments count
-  const totalMessages = messages.length;
-  const totalComments = messages.reduce((sum, message) => sum + message.commentCount, 0);
-  const totalPosts = totalMessages + totalComments;
+  // Get overall statistics from server
+  const { data: stats } = useQuery({
+    queryKey: ['/api/stats'],
+    queryFn: async () => {
+      const response = await fetch('/api/stats');
+      if (!response.ok) throw new Error('Failed to fetch stats');
+      return response.json();
+    },
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
 
   // Infinite scroll with intersection observer
   const [loadMoreElement, setLoadMoreElement] = useState<HTMLDivElement | null>(null);
@@ -153,6 +162,7 @@ export default function MessageBoard() {
     onSuccess: () => {
       setNewMessage("");
       queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
     },
     onError: (error: any) => {
       toast({
@@ -289,16 +299,16 @@ export default function MessageBoard() {
         <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-4">
           <div className="flex items-center justify-center space-x-6 text-center">
             <div className="flex flex-col">
-              <span className="text-2xl font-bold text-slate-800">{totalPosts}</span>
+              <span className="text-2xl font-bold text-slate-800">{stats?.totalPosts || 0}</span>
               <span className="text-sm text-slate-600">Total Posts</span>
             </div>
             <div className="h-8 w-px bg-slate-300"></div>
             <div className="flex flex-col">
-              <span className="text-lg font-semibold text-slate-700">{totalMessages}</span>
+              <span className="text-lg font-semibold text-slate-700">{stats?.totalMessages || 0}</span>
               <span className="text-xs text-slate-500">Messages</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-semibold text-slate-700">{totalComments}</span>
+              <span className="text-lg font-semibold text-slate-700">{stats?.totalComments || 0}</span>
               <span className="text-xs text-slate-500">Comments</span>
             </div>
           </div>

@@ -118,6 +118,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get overall statistics
+  app.get('/api/stats', async (req, res) => {
+    try {
+      // Get all messages to count total
+      const allMessages = await storage.getMessages(1000, 0, 'newest'); // Get a large number to ensure we get all
+      const totalMessages = allMessages.length;
+      
+      // Count all comments across all messages
+      let totalComments = 0;
+      for (const message of allMessages) {
+        const comments = await storage.getCommentsByMessageId(message.id);
+        totalComments += comments.length;
+      }
+      
+      res.json({
+        totalMessages,
+        totalComments,
+        totalPosts: totalMessages + totalComments
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      res.status(500).json({ error: 'Failed to fetch statistics' });
+    }
+  });
+  
   // Create new message
   app.post('/api/messages', async (req, res) => {
     try {
