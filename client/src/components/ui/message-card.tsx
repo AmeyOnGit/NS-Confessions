@@ -253,7 +253,7 @@ export function MessageCard({ message }: MessageCardProps) {
                       <Button
                         type="submit"
                         size="sm"
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-1 px-3 rounded-lg text-sm transition-colors"
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-9 hover:bg-primary/90 text-primary-foreground font-medium py-1 px-3 rounded-lg text-sm transition-colors bg-[#0f162b]"
                         disabled={commentMutation.isPending || newComment.trim().length === 0}
                       >
                         {commentMutation.isPending ? "Posting..." : "Comment"}
