@@ -2,6 +2,13 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -252,30 +259,16 @@ export default function MessageBoard() {
           <h2 className="text-lg font-semibold text-slate-800">Messages</h2>
           <div className="flex items-center space-x-2">
             <span className="text-sm text-slate-600">Sort by:</span>
-            <Button
-              variant={sortBy === 'newest' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSortBy('newest')}
-              className={`text-sm ${sortBy === 'newest' ? 'bg-[#0f162b] hover:bg-[#0f162b]/90' : ''}`}
-            >
-              Newest
-            </Button>
-            <Button
-              variant={sortBy === 'most_liked' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSortBy('most_liked')}
-              className={`text-sm ${sortBy === 'most_liked' ? 'bg-[#0f162b] hover:bg-[#0f162b]/90' : ''}`}
-            >
-              Most Liked
-            </Button>
-            <Button
-              variant={sortBy === 'most_commented' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSortBy('most_commented')}
-              className={`text-sm ${sortBy === 'most_commented' ? 'bg-[#0f162b] hover:bg-[#0f162b]/90' : ''}`}
-            >
-              Most Commented
-            </Button>
+            <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'newest' | 'most_liked' | 'most_commented')}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Select sorting" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="most_liked">Most Liked</SelectItem>
+                <SelectItem value="most_commented">Most Commented</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
