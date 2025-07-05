@@ -60,6 +60,7 @@ interface MessageCardProps {
 export function MessageCard({ message }: MessageCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
+  const [isLiked, setIsLiked] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -79,6 +80,7 @@ export function MessageCard({ message }: MessageCardProps) {
       return await apiRequest('POST', `/api/messages/${message.id}/like`);
     },
     onSuccess: () => {
+      setIsLiked(true);
       queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
     },
     onError: (error: any) => {
@@ -208,10 +210,12 @@ export function MessageCard({ message }: MessageCardProps) {
                 variant="ghost"
                 size="sm"
                 onClick={handleLike}
-                className="flex items-center space-x-2 text-slate-500 hover:text-red-500 transition-colors p-0"
+                className={`flex items-center space-x-2 transition-colors p-0 ${
+                  isLiked ? 'text-pink-500' : 'text-slate-500 hover:text-red-500'
+                }`}
                 disabled={likeMutation.isPending}
               >
-                <Heart className="h-4 w-4" />
+                <Heart className={`h-4 w-4 ${isLiked ? 'fill-pink-500' : ''}`} />
                 <span>{message.likes}</span>
               </Button>
               

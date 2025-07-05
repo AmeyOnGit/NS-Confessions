@@ -22,6 +22,7 @@ import {
   User,
   UserX
 } from "lucide-react";
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -44,6 +45,7 @@ interface CommentSectionProps {
 export function CommentSection({ comments }: CommentSectionProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [likedComments, setLikedComments] = useState<Set<number>>(new Set());
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -60,7 +62,8 @@ export function CommentSection({ comments }: CommentSectionProps) {
     mutationFn: async (commentId: number) => {
       return await apiRequest('POST', `/api/comments/${commentId}/like`);
     },
-    onSuccess: () => {
+    onSuccess: (data, commentId) => {
+      setLikedComments(prev => new Set(prev).add(commentId));
       queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
     },
     onError: (error: any) => {
@@ -173,10 +176,12 @@ export function CommentSection({ comments }: CommentSectionProps) {
                   variant="ghost"
                   size="sm"
                   onClick={() => likeCommentMutation.mutate(comment.id)}
-                  className="justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent rounded-md flex items-center space-x-1 text-slate-500 hover:text-red-500 transition-colors p-0 h-auto self-start pl-[0px] pr-[0px] pt-[0px] pb-[0px] mt-[16px] mb-[16px] ml-[10px] mr-[10px]"
+                  className={`justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent rounded-md flex items-center space-x-1 transition-colors p-0 h-auto self-start pl-[0px] pr-[0px] pt-[0px] pb-[0px] mt-[16px] mb-[16px] ml-[10px] mr-[10px] ${
+                    likedComments.has(comment.id) ? 'text-pink-500' : 'text-slate-500 hover:text-red-500'
+                  }`}
                   disabled={likeCommentMutation.isPending}
                 >
-                  <Heart className="h-3 w-3" />
+                  <Heart className={`h-3 w-3 ${likedComments.has(comment.id) ? 'fill-pink-500' : ''}`} />
                   <span className="text-xs">{comment.likes}</span>
                 </Button>
               </div>
