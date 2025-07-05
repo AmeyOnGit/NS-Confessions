@@ -170,13 +170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const messageId = parseInt(req.params.id);
       const ipAddress = getClientIP(req);
       
-      // Check if user already liked this message
-      const hasLiked = await storage.hasUserLikedMessage(messageId, ipAddress);
-      if (hasLiked) {
-        return res.status(400).json({ error: "You've already liked this message" });
-      }
-      
-      // Create like record
+      // Create like record (removed duplicate check to allow multiple likes)
       await storage.createLike({ messageId, ipAddress });
       
       // Update message like count
@@ -258,13 +252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const commentId = parseInt(req.params.id);
       const ipAddress = getClientIP(req);
       
-      // Check if user already liked this comment
-      const hasLiked = await storage.hasUserLikedComment(commentId, ipAddress);
-      if (hasLiked) {
-        return res.status(400).json({ error: "You've already liked this comment" });
-      }
-      
-      // Create like record
+      // Create like record (removed duplicate check to allow multiple likes)
       await storage.createCommentLike({
         commentId,
         ipAddress
