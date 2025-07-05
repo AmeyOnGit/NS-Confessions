@@ -171,7 +171,7 @@ export function CommentSection({ comments }: CommentSectionProps) {
                   variant="ghost"
                   size="sm"
                   onClick={() => likeCommentMutation.mutate(comment.id)}
-                  className="flex items-center space-x-1 text-slate-500 hover:text-red-500 transition-colors p-0 h-auto ml-4 self-start"
+                  className="justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent rounded-md flex items-center space-x-1 text-slate-500 hover:text-red-500 transition-colors p-0 h-auto self-start pl-[0px] pr-[0px] pt-[0px] pb-[0px] mt-[16px] mb-[16px] ml-[10px] mr-[10px]"
                   disabled={likeCommentMutation.isPending}
                 >
                   <Heart className="h-3 w-3" />
