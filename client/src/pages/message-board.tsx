@@ -219,7 +219,7 @@ export default function MessageBoard() {
                   <Textarea
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Forgive me Father for I have sinned. . ."
+                    placeholder="Forgive me Father for I have sinned..."
                     className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all duration-200"
                     rows={3}
                     maxLength={500}

@@ -157,19 +157,21 @@ export function CommentSection({ comments }: CommentSectionProps) {
                   return <IconComponent className={`h-4 w-4 ${getIconColor(comment.id)}`} />;
                 })()}
               </div>
-              <div className="flex-1">
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="text-base md:text-sm font-medium text-slate-800">{getAnonymousName(comment.id)}</span>
-                  {!comment.isBot && (
-                    <span className="text-sm md:text-xs text-slate-500">{formatTimeAgo(comment.createdAt)}</span>
-                  )}
+              <div className="flex-1 flex justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className="text-base md:text-sm font-medium text-slate-800">{getAnonymousName(comment.id)}</span>
+                    {!comment.isBot && (
+                      <span className="text-sm md:text-xs text-slate-500">{formatTimeAgo(comment.createdAt)}</span>
+                    )}
+                  </div>
+                  <p className="text-slate-700 text-base md:text-sm whitespace-pre-wrap">{comment.content}</p>
                 </div>
-                <p className="text-slate-700 text-base md:text-sm whitespace-pre-wrap mb-2">{comment.content}</p>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => likeCommentMutation.mutate(comment.id)}
-                  className="flex items-center space-x-1 text-slate-500 hover:text-red-500 transition-colors p-0 h-auto"
+                  className="flex items-center space-x-1 text-slate-500 hover:text-red-500 transition-colors p-0 h-auto ml-4 self-start"
                   disabled={likeCommentMutation.isPending}
                 >
                   <Heart className="h-3 w-3" />
