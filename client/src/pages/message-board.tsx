@@ -120,6 +120,11 @@ export default function MessageBoard() {
 
   // Flatten all pages into a single array of messages
   const messages = data?.pages.flat() || [];
+  
+  // Calculate total messages and comments count
+  const totalMessages = messages.length;
+  const totalComments = messages.reduce((sum, message) => sum + message.commentCount, 0);
+  const totalPosts = totalMessages + totalComments;
 
   // Infinite scroll with intersection observer
   const [loadMoreElement, setLoadMoreElement] = useState<HTMLDivElement | null>(null);
@@ -279,6 +284,25 @@ export default function MessageBoard() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Total Count Display */}
+        <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-4">
+          <div className="flex items-center justify-center space-x-6 text-center">
+            <div className="flex flex-col">
+              <span className="text-2xl font-bold text-slate-800">{totalPosts}</span>
+              <span className="text-sm text-slate-600">Total Posts</span>
+            </div>
+            <div className="h-8 w-px bg-slate-300"></div>
+            <div className="flex flex-col">
+              <span className="text-lg font-semibold text-slate-700">{totalMessages}</span>
+              <span className="text-xs text-slate-500">Messages</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-lg font-semibold text-slate-700">{totalComments}</span>
+              <span className="text-xs text-slate-500">Comments</span>
+            </div>
+          </div>
+        </div>
 
         {/* Sorting Controls */}
         <div className="flex items-center justify-between mb-6">
