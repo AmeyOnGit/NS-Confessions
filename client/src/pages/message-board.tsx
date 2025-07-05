@@ -24,6 +24,8 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import logoImage from "@assets/Screenshot 2025-07-05 at 16.37.55_1751705681308.png";
 import { apiRequest } from "@/lib/queryClient";
 
+import Screenshot_2025_07_05_at_16_37_55_removebg_preview from "@assets/Screenshot_2025-07-05_at_16.37.55-removebg-preview.png";
+
 interface Message {
   id: number;
   content: string;
@@ -178,7 +180,7 @@ export default function MessageBoard() {
             <div className="flex items-center">
               <div className="mr-3">
                 <img 
-                  src={logoImage}
+                  src={Screenshot_2025_07_05_at_16_37_55_removebg_preview}
                   alt="NS Flag Logo" 
                   className="h-6 w-auto object-contain"
                 />
@@ -206,7 +208,6 @@ export default function MessageBoard() {
           </div>
         </div>
       </header>
-
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* New Message Form */}
