@@ -246,7 +246,7 @@ export default function MessageBoard() {
         <Card className="mb-6 shadow-sm border border-slate-200">
           <CardContent className="p-4">
             <p className="text-sm text-slate-700">
-              <span className="font-bold">A message from the void:</span> This space thrives on curiosity, vulnerability, and weirdness. Not harm. Don't post anything that could get someone hurt, harassed, or hauled into a meeting. Let's not ruin a good thing. ✨
+              <span className="font-bold">A message from the void:</span> This space thrives on curiosity, honesty, and weirdness. Not harm. Don't post anything that could get someone hurt, harassed, or hauled into a meeting. Let's not ruin a good thing. ✨
             </p>
           </CardContent>
         </Card>
