@@ -200,12 +200,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const ipAddress = getClientIP(req);
       
-      // Check rate limit
-      const canPost = await storage.canUserPostMessage(ipAddress);
-      if (!canPost) {
-        return res.status(429).json({ error: 'Rate limit exceeded. Please wait before posting again.' });
-      }
-      
       // Validate input
       const result = insertMessageSchema.safeParse({
         content: req.body.content,
@@ -233,9 +227,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         content: sanitizedContent,
         ipAddress
       });
-      
-      // Update rate limit
-      await storage.updateRateLimit(ipAddress);
       
       // Generate AI bot response
       const botResponse = await generateBotResponse(sanitizedContent);
