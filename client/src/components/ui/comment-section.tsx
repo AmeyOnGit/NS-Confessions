@@ -160,7 +160,9 @@ export function CommentSection({ comments }: CommentSectionProps) {
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-2">
                   <span className="text-sm font-medium text-slate-800">{getAnonymousName(comment.id)}</span>
-                  <span className="text-xs text-slate-500">{formatTimeAgo(comment.createdAt)}</span>
+                  {!comment.isBot && (
+                    <span className="text-xs text-slate-500">{formatTimeAgo(comment.createdAt)}</span>
+                  )}
                 </div>
                 <p className="text-slate-700 text-sm whitespace-pre-wrap mb-2">{comment.content}</p>
                 <Button
