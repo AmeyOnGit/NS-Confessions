@@ -62,7 +62,8 @@ export function CommentSection({ comments, isAdmin = false }: CommentSectionProp
 
   const likeCommentMutation = useMutation({
     mutationFn: async (commentId: number) => {
-      return await apiRequest('POST', `/api/comments/${commentId}/like`);
+      const sessionId = localStorage.getItem("anonymousboard_session");
+      return await apiRequest('POST', `/api/comments/${commentId}/like`, { sessionId });
     },
     onSuccess: (data, commentId) => {
       setLikedComments(prev => new Set(prev).add(commentId));

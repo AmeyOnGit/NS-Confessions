@@ -194,6 +194,7 @@ export default function MessageBoard() {
   const handleLogout = () => {
     localStorage.removeItem("anonymousboard_auth");
     localStorage.removeItem("anonymousboard_admin");
+    localStorage.removeItem("anonymousboard_session");
     setLocation("/");
   };
 

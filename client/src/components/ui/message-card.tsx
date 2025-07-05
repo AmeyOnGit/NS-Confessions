@@ -81,7 +81,8 @@ export function MessageCard({ message, isAdmin = false }: MessageCardProps) {
 
   const likeMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest('POST', `/api/messages/${message.id}/like`);
+      const sessionId = localStorage.getItem("anonymousboard_session");
+      return await apiRequest('POST', `/api/messages/${message.id}/like`, { sessionId });
     },
     onSuccess: () => {
       setIsLiked(true);

@@ -34,9 +34,9 @@ export interface IStorage {
   
   // Likes
   createLike(like: InsertLike): Promise<Like>;
-  hasUserLikedMessage(messageId: number, ipAddress: string): Promise<boolean>;
+  hasUserLikedMessage(messageId: number, ipAddress: string, sessionId: string): Promise<boolean>;
   createCommentLike(commentLike: InsertCommentLike): Promise<CommentLike>;
-  hasUserLikedComment(commentId: number, ipAddress: string): Promise<boolean>;
+  hasUserLikedComment(commentId: number, ipAddress: string, sessionId: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -178,14 +178,15 @@ export class MemStorage implements IStorage {
       id,
       messageId: insertLike.messageId,
       ipAddress: insertLike.ipAddress,
+      sessionId: insertLike.sessionId,
     };
     this.likes.set(id, like);
     return like;
   }
 
-  async hasUserLikedMessage(messageId: number, ipAddress: string): Promise<boolean> {
+  async hasUserLikedMessage(messageId: number, ipAddress: string, sessionId: string): Promise<boolean> {
     return Array.from(this.likes.values())
-      .some(like => like.messageId === messageId && like.ipAddress === ipAddress);
+      .some(like => like.messageId === messageId && like.ipAddress === ipAddress && like.sessionId === sessionId);
   }
 
   async likeComment(commentId: number): Promise<Comment> {
@@ -210,11 +211,12 @@ export class MemStorage implements IStorage {
       id,
       commentId: insertCommentLike.commentId,
       ipAddress: insertCommentLike.ipAddress,
+      sessionId: insertCommentLike.sessionId,
     };
     return commentLike;
   }
 
-  async hasUserLikedComment(commentId: number, ipAddress: string): Promise<boolean> {
+  async hasUserLikedComment(commentId: number, ipAddress: string, sessionId: string): Promise<boolean> {
     // For MemStorage, we'll always return false for simplicity
     return false;
   }
@@ -380,13 +382,14 @@ export class DatabaseStorage implements IStorage {
     return like;
   }
 
-  async hasUserLikedMessage(messageId: number, ipAddress: string): Promise<boolean> {
+  async hasUserLikedMessage(messageId: number, ipAddress: string, sessionId: string): Promise<boolean> {
     const [existingLike] = await db
       .select()
       .from(likes)
       .where(and(
         eq(likes.messageId, messageId),
-        eq(likes.ipAddress, ipAddress)
+        eq(likes.ipAddress, ipAddress),
+        eq(likes.sessionId, sessionId)
       ));
     
     return !!existingLike;
@@ -400,13 +403,14 @@ export class DatabaseStorage implements IStorage {
     return commentLike;
   }
 
-  async hasUserLikedComment(commentId: number, ipAddress: string): Promise<boolean> {
+  async hasUserLikedComment(commentId: number, ipAddress: string, sessionId: string): Promise<boolean> {
     const [existingLike] = await db
       .select()
       .from(commentLikes)
       .where(and(
         eq(commentLikes.commentId, commentId),
-        eq(commentLikes.ipAddress, ipAddress)
+        eq(commentLikes.ipAddress, ipAddress),
+        eq(commentLikes.sessionId, sessionId)
       ));
     
     return !!existingLike;

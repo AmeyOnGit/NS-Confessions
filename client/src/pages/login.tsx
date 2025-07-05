@@ -29,6 +29,7 @@ export default function Login() {
         const data = await response.json();
         localStorage.setItem("anonymousboard_auth", "true");
         localStorage.setItem("anonymousboard_admin", data.isAdmin ? "true" : "false");
+        localStorage.setItem("anonymousboard_session", data.sessionId);
         setLocation("/board");
       } else {
         toast({

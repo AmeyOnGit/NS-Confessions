@@ -81,10 +81,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Password verification
   app.post('/api/auth/login', (req, res) => {
     const { password } = req.body;
+    const sessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    
     if (password === PASSWORD) {
-      res.json({ success: true, isAdmin: false });
+      res.json({ success: true, isAdmin: false, sessionId });
     } else if (password === ADMIN_PASSWORD) {
-      res.json({ success: true, isAdmin: true });
+      res.json({ success: true, isAdmin: true, sessionId });
     } else {
       res.status(401).json({ error: 'Invalid password' });
     }
@@ -197,9 +199,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const messageId = parseInt(req.params.id);
       const ipAddress = getClientIP(req);
+      const sessionId = req.body.sessionId;
       
-      // Create like record (removed duplicate check to allow multiple likes)
-      await storage.createLike({ messageId, ipAddress });
+      if (!sessionId) {
+        return res.status(400).json({ error: 'Session ID is required' });
+      }
+      
+      // Check if user has already liked this message in this session
+      const hasLiked = await storage.hasUserLikedMessage(messageId, ipAddress, sessionId);
+      if (hasLiked) {
+        return res.status(409).json({ error: 'You have already liked this message. Please logout and login again to like it again.' });
+      }
+      
+      // Create like record
+      await storage.createLike({ messageId, ipAddress, sessionId });
       
       // Update message like count
       const updatedMessage = await storage.likeMessage(messageId);
@@ -279,11 +292,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const commentId = parseInt(req.params.id);
       const ipAddress = getClientIP(req);
+      const sessionId = req.body.sessionId;
       
-      // Create like record (removed duplicate check to allow multiple likes)
+      if (!sessionId) {
+        return res.status(400).json({ error: 'Session ID is required' });
+      }
+      
+      // Check if user has already liked this comment in this session
+      const hasLiked = await storage.hasUserLikedComment(commentId, ipAddress, sessionId);
+      if (hasLiked) {
+        return res.status(409).json({ error: 'You have already liked this comment. Please logout and login again to like it again.' });
+      }
+      
+      // Create like record
       await storage.createCommentLike({
         commentId,
-        ipAddress
+        ipAddress,
+        sessionId
       });
       
       // Update comment likes count

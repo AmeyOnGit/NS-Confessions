@@ -25,12 +25,14 @@ export const likes = pgTable("likes", {
   id: serial("id").primaryKey(),
   messageId: integer("message_id").notNull(),
   ipAddress: text("ip_address").notNull(),
+  sessionId: text("session_id").notNull(),
 });
 
 export const commentLikes = pgTable("comment_likes", {
   id: serial("id").primaryKey(),
   commentId: integer("comment_id").notNull(),
   ipAddress: text("ip_address").notNull(),
+  sessionId: text("session_id").notNull(),
 });
 
 export const rateLimits = pgTable("rate_limits", {
