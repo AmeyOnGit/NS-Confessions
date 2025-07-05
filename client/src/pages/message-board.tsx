@@ -9,7 +9,6 @@ import { useWebSocket } from "@/lib/websocket";
 import { MessageCard } from "@/components/ui/message-card";
 import { 
   MessageCircle, 
-  Users, 
   LogOut, 
   PlusCircle, 
   Clock,
@@ -39,7 +38,6 @@ interface Comment {
 export default function MessageBoard() {
   const [, setLocation] = useLocation();
   const [newMessage, setNewMessage] = useState("");
-  const [onlineCount, setOnlineCount] = useState(12);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { connect, disconnect, onMessage, isConnected } = useWebSocket();
@@ -167,10 +165,6 @@ export default function MessageBoard() {
             </div>
             
             <div className="flex items-center space-x-4">
-              <div className="flex items-center text-sm text-slate-600">
-                <Users className="h-4 w-4 mr-1" />
-                <span>{onlineCount}</span> online
-              </div>
               <Button
                 variant="ghost"
                 size="sm"
@@ -217,7 +211,8 @@ export default function MessageBoard() {
                     
                     <Button
                       type="submit"
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02]"
+                      className="text-white font-semibold py-2 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02]"
+                      style={{ backgroundColor: '#0f162b', borderColor: '#0f162b' }}
                       disabled={submitMessageMutation.isPending || newMessage.trim().length === 0}
                     >
                       {submitMessageMutation.isPending ? (
