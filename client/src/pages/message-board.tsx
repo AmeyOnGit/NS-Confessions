@@ -227,6 +227,15 @@ export default function MessageBoard() {
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Message from the void */}
+        <Card className="mb-6 shadow-sm border border-slate-200">
+          <CardContent className="p-4">
+            <p className="text-sm text-slate-700">
+              <span className="font-bold">A message from the void:</span> This space thrives on curiosity, vulnerability, and weirdness. Not harm. Don't post anything that could get someone hurt, harassed, or hauled into a meeting. Let's not ruin a good thing. ✨
+            </p>
+          </CardContent>
+        </Card>
+
         {/* New Message Form */}
         <Card className="mb-6 shadow-sm border border-slate-200">
           <CardContent className="p-6">
@@ -235,13 +244,6 @@ export default function MessageBoard() {
                 <PlusCircle className="h-5 w-5 text-slate-600" />
               </div>
               <div className="flex-1">
-                {/* Message from the void */}
-                <div className="mb-4 p-4 bg-slate-100 rounded-xl border border-slate-200">
-                  <p className="text-sm text-slate-700">
-                    <span className="font-bold">A message from the void:</span> This space thrives on curiosity, vulnerability, and weirdness. Not harm. Don't post anything that could get someone hurt, harassed, or hauled into a meeting. Let's not ruin a good thing. ✨
-                  </p>
-                </div>
-                
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <Textarea
                     value={newMessage}
