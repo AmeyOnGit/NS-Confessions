@@ -11,7 +11,6 @@ import {
   MessageCircle, 
   LogOut, 
   PlusCircle, 
-  Clock,
   Send
 } from "lucide-react";
 import logoImage from "@assets/Screenshot 2025-07-05 at 16.37.55_1751705681308.png";
@@ -224,10 +223,6 @@ export default function MessageBoard() {
                       <span className="text-sm text-slate-500">
                         {newMessage.length}/500
                       </span>
-                      <div className="flex items-center text-sm text-slate-500">
-                        <Clock className="h-4 w-4 mr-1" />
-                        <span>Ready to post</span>
-                      </div>
                     </div>
                     
                     <Button

@@ -8,7 +8,6 @@ import { CommentSection } from "./comment-section";
 import { 
   Heart, 
   MessageCircle, 
-  Clock, 
   KeyRound,
   ChevronDown,
   ChevronUp,
@@ -200,7 +199,7 @@ export function MessageCard({ message }: MessageCardProps) {
               )}
             </div>
             
-            <p className="text-slate-700 mb-4 leading-relaxed whitespace-pre-wrap">
+            <p className="text-slate-700 mb-2 leading-relaxed whitespace-pre-wrap">
               {message.content}
             </p>
             
@@ -227,10 +226,7 @@ export function MessageCard({ message }: MessageCardProps) {
                 {showComments ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </Button>
               
-              <span className="text-xs text-slate-400 flex items-center">
-                <Clock className="h-3 w-3 mr-1" />
-                <span>{new Date(message.createdAt).toLocaleString()}</span>
-              </span>
+
             </div>
             
             {/* Comments Section */}
