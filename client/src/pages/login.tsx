@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowRight, Shield } from "lucide-react";
+import logoImage from "@assets/Screenshot 2025-07-05 at 16.37.55_1751705681308.png";
 
 export default function Login() {
   const [password, setPassword] = useState("");
@@ -51,16 +52,11 @@ export default function Login() {
         <CardContent className="pt-8 p-8">
           <div className="text-center mb-8">
             <div className="flex justify-center mx-auto mb-4">
-              <svg className="h-12 w-16" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Flag pole */}
-                <rect x="8" y="10" width="4" height="60" fill="#374151" />
-                <circle cx="10" cy="10" r="3" fill="#374151" />
-                {/* Flag with wavy effect */}
-                <path d="M12 15 C50 15 60 20 90 15 C100 25 90 35 90 40 C60 45 50 40 12 40 Z" fill="#1e3a8a" />
-                {/* Cross on flag */}
-                <rect x="45" y="22" width="6" height="16" fill="white" />
-                <rect x="35" y="27" width="26" height="6" fill="white" />
-              </svg>
+              <img 
+                src={logoImage}
+                alt="NS Flag Logo" 
+                className="h-12 w-auto object-contain"
+              />
             </div>
             <h1 className="text-2xl font-bold text-slate-800 mb-2">NS Confessions</h1>
             <p className="text-slate-600">Enter the NS WiFi password to gain access.</p>

@@ -15,6 +15,7 @@ import {
   Clock,
   Send
 } from "lucide-react";
+import logoImage from "@assets/Screenshot 2025-07-05 at 16.37.55_1751705681308.png";
 import { apiRequest } from "@/lib/queryClient";
 
 interface Message {
@@ -150,16 +151,11 @@ export default function MessageBoard() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
               <div className="mr-3">
-                <svg className="h-6 w-8" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  {/* Flag pole */}
-                  <rect x="8" y="10" width="4" height="60" fill="#374151" />
-                  <circle cx="10" cy="10" r="3" fill="#374151" />
-                  {/* Flag with wavy effect */}
-                  <path d="M12 15 C50 15 60 20 90 15 C100 25 90 35 90 40 C60 45 50 40 12 40 Z" fill="#1e3a8a" />
-                  {/* Cross on flag */}
-                  <rect x="45" y="22" width="6" height="16" fill="white" />
-                  <rect x="35" y="27" width="26" height="6" fill="white" />
-                </svg>
+                <img 
+                  src={logoImage}
+                  alt="NS Flag Logo" 
+                  className="h-6 w-auto object-contain"
+                />
               </div>
               <h1 className="text-xl font-bold text-slate-800">NS Confessions</h1>
               <span className="ml-3 px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-full">
