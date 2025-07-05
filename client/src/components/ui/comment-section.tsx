@@ -182,17 +182,19 @@ export function CommentSection({ comments, isAdmin = false }: CommentSectionProp
                   return <IconComponent className={`h-4 w-4 ${getIconColor(comment.id)}`} />;
                 })()}
               </div>
-              <div className="flex-1">
-                <div className="mb-2">
-                  <span className="text-base md:text-sm font-medium text-slate-800">{getAnonymousName(comment.id)}</span>
-                  {!comment.isBot && (
-                    <div className="block md:inline md:ml-2">
-                      <span className="text-sm md:text-xs text-slate-500">{formatTimeAgo(comment.createdAt)}</span>
-                    </div>
-                  )}
+              <div className="flex-1 flex items-start justify-between">
+                <div className="flex-1 pr-3">
+                  <div className="mb-2">
+                    <span className="text-base md:text-sm font-medium text-slate-800">{getAnonymousName(comment.id)}</span>
+                    {!comment.isBot && (
+                      <div className="block md:inline md:ml-2">
+                        <span className="text-sm md:text-xs text-slate-500">{formatTimeAgo(comment.createdAt)}</span>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-slate-700 text-base md:text-sm whitespace-pre-wrap">{comment.content}</p>
                 </div>
-                <p className="text-slate-700 text-base md:text-sm whitespace-pre-wrap mb-2">{comment.content}</p>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-shrink-0">
                   <Button
                     variant="ghost"
                     size="sm"
