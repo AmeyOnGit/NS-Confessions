@@ -45,7 +45,7 @@ interface Comment {
 export default function MessageBoard() {
   const [, setLocation] = useLocation();
   const [newMessage, setNewMessage] = useState("");
-  const [sortBy, setSortBy] = useState<'newest' | 'most_liked' | 'most_commented'>('newest');
+  const [sortBy, setSortBy] = useState<'newest' | 'most_liked' | 'most_commented' | 'hottest'>('hottest');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isAdmin = localStorage.getItem("anonymousboard_admin") === "true";
@@ -319,11 +319,12 @@ export default function MessageBoard() {
           <h2 className="text-xl md:text-lg font-semibold text-slate-800">Messages</h2>
           <div className="flex items-center space-x-2">
             <span className="text-sm text-slate-600">Sort by:</span>
-            <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'newest' | 'most_liked' | 'most_commented')}>
+            <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'newest' | 'most_liked' | 'most_commented' | 'hottest')}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Select sorting" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="hottest">Hottest</SelectItem>
                 <SelectItem value="newest">Newest</SelectItem>
                 <SelectItem value="most_liked">Most Liked</SelectItem>
                 <SelectItem value="most_commented">Most Commented</SelectItem>

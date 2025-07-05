@@ -20,7 +20,7 @@ import { eq, desc, and, sql } from "drizzle-orm";
 export interface IStorage {
   // Messages
   createMessage(message: InsertMessage): Promise<Message>;
-  getMessages(limit?: number, offset?: number, sortBy?: 'newest' | 'most_liked' | 'most_commented'): Promise<Message[]>;
+  getMessages(limit?: number, offset?: number, sortBy?: 'newest' | 'most_liked' | 'most_commented' | 'hottest'): Promise<Message[]>;
   getMessageById(id: number): Promise<Message | undefined>;
   likeMessage(messageId: number): Promise<Message>;
   deleteMessage(messageId: number): Promise<void>;
@@ -72,7 +72,7 @@ export class MemStorage implements IStorage {
     return message;
   }
 
-  async getMessages(limit: number = 20, offset: number = 0, sortBy: 'newest' | 'most_liked' | 'most_commented' = 'newest'): Promise<Message[]> {
+  async getMessages(limit: number = 20, offset: number = 0, sortBy: 'newest' | 'most_liked' | 'most_commented' | 'hottest' = 'newest'): Promise<Message[]> {
     const allMessages = Array.from(this.messages.values());
     
     if (sortBy === 'most_liked') {
@@ -83,6 +83,22 @@ export class MemStorage implements IStorage {
         const aCommentCount = Array.from(this.comments.values()).filter(c => c.messageId === a.id).length;
         const bCommentCount = Array.from(this.comments.values()).filter(c => c.messageId === b.id).length;
         return bCommentCount - aCommentCount;
+      });
+    } else if (sortBy === 'hottest') {
+      // Sort by most recent activity (newest message creation or comment addition)
+      allMessages.sort((a, b) => {
+        // Get the latest comment date for each message
+        const aComments = Array.from(this.comments.values()).filter(c => c.messageId === a.id);
+        const bComments = Array.from(this.comments.values()).filter(c => c.messageId === b.id);
+        
+        const aLatestComment = aComments.length > 0 ? Math.max(...aComments.map(c => c.createdAt.getTime())) : 0;
+        const bLatestComment = bComments.length > 0 ? Math.max(...bComments.map(c => c.createdAt.getTime())) : 0;
+        
+        // Compare the most recent activity (message creation or latest comment)
+        const aLatestActivity = Math.max(a.createdAt.getTime(), aLatestComment);
+        const bLatestActivity = Math.max(b.createdAt.getTime(), bLatestComment);
+        
+        return bLatestActivity - aLatestActivity;
       });
     } else {
       allMessages.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
@@ -217,7 +233,7 @@ export class DatabaseStorage implements IStorage {
     return message;
   }
 
-  async getMessages(limit: number = 20, offset: number = 0, sortBy: 'newest' | 'most_liked' | 'most_commented' = 'newest'): Promise<Message[]> {
+  async getMessages(limit: number = 20, offset: number = 0, sortBy: 'newest' | 'most_liked' | 'most_commented' | 'hottest' = 'newest'): Promise<Message[]> {
     if (sortBy === 'most_commented') {
       // Use a subquery to count comments per message and sort by that count
       const messagesWithCommentCount = await db
@@ -235,6 +251,29 @@ export class DatabaseStorage implements IStorage {
         .offset(offset);
       
       return messagesWithCommentCount;
+    } else if (sortBy === 'hottest') {
+      // Sort by most recent activity (message creation or latest comment)
+      const messagesWithLatestActivity = await db
+        .select({
+          id: messages.id,
+          content: messages.content,
+          ipAddress: messages.ipAddress,
+          createdAt: messages.createdAt,
+          likes: messages.likes,
+          latestActivity: sql<Date>`GREATEST(
+            ${messages.createdAt},
+            COALESCE((SELECT MAX(${comments.createdAt}) FROM ${comments} WHERE ${comments.messageId} = ${messages.id}), ${messages.createdAt})
+          )`
+        })
+        .from(messages)
+        .orderBy(desc(sql<Date>`GREATEST(
+          ${messages.createdAt},
+          COALESCE((SELECT MAX(${comments.createdAt}) FROM ${comments} WHERE ${comments.messageId} = ${messages.id}), ${messages.createdAt})
+        )`))
+        .limit(limit)
+        .offset(offset);
+      
+      return messagesWithLatestActivity;
     } else {
       const orderBy = sortBy === 'most_liked' ? desc(messages.likes) : desc(messages.createdAt);
       

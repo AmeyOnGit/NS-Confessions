@@ -95,7 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const limit = parseInt(req.query.limit as string) || 20;
       const offset = parseInt(req.query.offset as string) || 0;
-      const sortBy = (req.query.sortBy as 'newest' | 'most_liked' | 'most_commented') || 'newest';
+      const sortBy = (req.query.sortBy as 'newest' | 'most_liked' | 'most_commented' | 'hottest') || 'newest';
       
       const messages = await storage.getMessages(limit, offset, sortBy);
       
