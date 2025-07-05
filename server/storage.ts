@@ -23,11 +23,13 @@ export interface IStorage {
   getMessages(limit?: number, offset?: number, sortBy?: 'newest' | 'most_liked' | 'most_commented'): Promise<Message[]>;
   getMessageById(id: number): Promise<Message | undefined>;
   likeMessage(messageId: number): Promise<Message>;
+  deleteMessage(messageId: number): Promise<void>;
   
   // Comments
   createComment(comment: InsertComment): Promise<Comment>;
   getCommentsByMessageId(messageId: number): Promise<Comment[]>;
   likeComment(commentId: number): Promise<Comment>;
+  deleteComment(commentId: number): Promise<void>;
   
   // Likes
   createLike(like: InsertLike): Promise<Like>;
@@ -104,6 +106,22 @@ export class MemStorage implements IStorage {
     return updatedMessage;
   }
 
+  async deleteMessage(messageId: number): Promise<void> {
+    this.messages.delete(messageId);
+    // Also delete associated comments and likes
+    const commentsToDelete = Array.from(this.comments.keys()).filter(id => {
+      const comment = this.comments.get(id);
+      return comment?.messageId === messageId;
+    });
+    commentsToDelete.forEach(id => this.comments.delete(id));
+    
+    const likesToDelete = Array.from(this.likes.keys()).filter(id => {
+      const like = this.likes.get(id);
+      return like?.messageId === messageId;
+    });
+    likesToDelete.forEach(id => this.likes.delete(id));
+  }
+
   async createComment(insertComment: InsertComment): Promise<Comment> {
     const id = this.currentCommentId++;
     const comment: Comment = {
@@ -150,6 +168,10 @@ export class MemStorage implements IStorage {
     const updatedComment = { ...comment, likes: comment.likes + 1 };
     this.comments.set(commentId, updatedComment);
     return updatedComment;
+  }
+
+  async deleteComment(commentId: number): Promise<void> {
+    this.comments.delete(commentId);
   }
 
   async createCommentLike(insertCommentLike: InsertCommentLike): Promise<CommentLike> {
@@ -331,6 +353,25 @@ export class DatabaseStorage implements IStorage {
       ));
     
     return !!existingLike;
+  }
+
+  async deleteMessage(messageId: number): Promise<void> {
+    // Delete associated comments first
+    await db.delete(comments).where(eq(comments.messageId, messageId));
+    
+    // Delete associated likes
+    await db.delete(likes).where(eq(likes.messageId, messageId));
+    
+    // Delete the message
+    await db.delete(messages).where(eq(messages.id, messageId));
+  }
+
+  async deleteComment(commentId: number): Promise<void> {
+    // Delete associated comment likes first
+    await db.delete(commentLikes).where(eq(commentLikes.commentId, commentId));
+    
+    // Delete the comment
+    await db.delete(comments).where(eq(comments.id, commentId));
   }
 
   // Rate limiting functionality removed per user request

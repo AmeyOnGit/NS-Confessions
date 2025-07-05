@@ -48,6 +48,7 @@ export default function MessageBoard() {
   const [sortBy, setSortBy] = useState<'newest' | 'most_liked' | 'most_commented'>('newest');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isAdmin = localStorage.getItem("anonymousboard_admin") === "true";
   const { connect, disconnect, onMessage, isConnected } = useWebSocket();
 
   // Check authentication
@@ -108,6 +109,19 @@ export default function MessageBoard() {
             }));
           });
           break;
+        case 'message_deleted':
+          queryClient.setQueryData(['/api/messages', sortBy], (old: Message[] | undefined) => {
+            return old?.filter(msg => msg.id !== data.messageId);
+          });
+          break;
+        case 'comment_deleted':
+          queryClient.setQueryData(['/api/messages', sortBy], (old: Message[] | undefined) => {
+            return old?.map(msg => ({
+              ...msg,
+              comments: msg.comments.filter(comment => comment.id !== data.commentId)
+            }));
+          });
+          break;
       }
     });
 
@@ -165,6 +179,7 @@ export default function MessageBoard() {
 
   const handleLogout = () => {
     localStorage.removeItem("anonymousboard_auth");
+    localStorage.removeItem("anonymousboard_admin");
     setLocation("/");
   };
 
@@ -183,6 +198,11 @@ export default function MessageBoard() {
                 />
               </div>
               <h1 className="text-2xl md:text-xl font-bold text-slate-800">NS Confessions</h1>
+              {isAdmin && (
+                <span className="ml-3 px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
+                  Admin
+                </span>
+              )}
               <span className="ml-3 px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-full">
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full mr-1"></div>
@@ -289,7 +309,7 @@ export default function MessageBoard() {
             </Card>
           ) : (
             messages.map((message) => (
-              <MessageCard key={message.id} message={message} />
+              <MessageCard key={message.id} message={message} isAdmin={isAdmin} />
             ))
           )}
         </div>

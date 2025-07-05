@@ -11,6 +11,7 @@ import {
   KeyRound,
   ChevronDown,
   ChevronUp,
+  Trash2,
   User,
   UserX,
   Ghost,
@@ -55,9 +56,10 @@ interface Message {
 
 interface MessageCardProps {
   message: Message;
+  isAdmin?: boolean;
 }
 
-export function MessageCard({ message }: MessageCardProps) {
+export function MessageCard({ message, isAdmin = false }: MessageCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [isLiked, setIsLiked] = useState(false);
@@ -104,6 +106,26 @@ export function MessageCard({ message }: MessageCardProps) {
       toast({
         title: "Error",
         description: error.message || "Failed to post comment",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteMessageMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest('DELETE', `/api/messages/${message.id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
+      toast({
+        title: "Message deleted",
+        description: "The message has been removed",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete message",
         variant: "destructive",
       });
     },
@@ -230,13 +252,25 @@ export function MessageCard({ message }: MessageCardProps) {
                 {showComments ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </Button>
               
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => deleteMessageMutation.mutate()}
+                  className="flex items-center space-x-2 text-slate-500 hover:text-red-500 transition-colors p-0"
+                  disabled={deleteMessageMutation.isPending}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span>Delete</span>
+                </Button>
+              )}
 
             </div>
             
             {/* Comments Section */}
             {showComments && (
               <div className="mt-4 pt-4 border-t border-slate-100">
-                <CommentSection comments={message.comments} />
+                <CommentSection comments={message.comments} isAdmin={isAdmin} />
                 
                 {/* Add Comment Form */}
                 <form onSubmit={handleComment} className="flex items-start space-x-3 mt-4">

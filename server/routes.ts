@@ -7,6 +7,7 @@ import { z } from "zod";
 // AI bot functionality removed per user request
 
 const PASSWORD = "darktalent2024!";
+const ADMIN_PASSWORD = "admin";
 
 interface WebSocketClient extends WebSocket {
   isAlive?: boolean;
@@ -71,7 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication middleware
   app.use('/api/auth', (req, res, next) => {
     const { password } = req.body;
-    if (password !== PASSWORD) {
+    if (password !== PASSWORD && password !== ADMIN_PASSWORD) {
       return res.status(401).json({ error: 'Invalid password' });
     }
     next();
@@ -81,7 +82,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/login', (req, res) => {
     const { password } = req.body;
     if (password === PASSWORD) {
-      res.json({ success: true });
+      res.json({ success: true, isAdmin: false });
+    } else if (password === ADMIN_PASSWORD) {
+      res.json({ success: true, isAdmin: true });
     } else {
       res.status(401).json({ error: 'Invalid password' });
     }
@@ -272,6 +275,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error liking comment:', error);
       res.status(500).json({ error: 'Failed to like comment' });
+    }
+  });
+
+  // Admin-only delete routes
+  app.delete('/api/messages/:id', async (req, res) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      await storage.deleteMessage(messageId);
+      
+      // Broadcast deletion to all clients
+      broadcast({
+        type: 'message_deleted',
+        messageId
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      res.status(500).json({ error: 'Failed to delete message' });
+    }
+  });
+
+  app.delete('/api/comments/:id', async (req, res) => {
+    try {
+      const commentId = parseInt(req.params.id);
+      await storage.deleteComment(commentId);
+      
+      // Broadcast deletion to all clients
+      broadcast({
+        type: 'comment_deleted',
+        commentId
+      });
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      res.status(500).json({ error: 'Failed to delete comment' });
     }
   });
 

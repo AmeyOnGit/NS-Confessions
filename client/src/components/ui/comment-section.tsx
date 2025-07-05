@@ -20,7 +20,8 @@ import {
   Leaf,
   Waves,
   User,
-  UserX
+  UserX,
+  Trash2
 } from "lucide-react";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -40,9 +41,10 @@ interface Comment {
 
 interface CommentSectionProps {
   comments: Comment[];
+  isAdmin?: boolean;
 }
 
-export function CommentSection({ comments }: CommentSectionProps) {
+export function CommentSection({ comments, isAdmin = false }: CommentSectionProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [likedComments, setLikedComments] = useState<Set<number>>(new Set());
@@ -70,6 +72,26 @@ export function CommentSection({ comments }: CommentSectionProps) {
       toast({
         title: "Error",
         description: error.message || "Failed to like comment",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteCommentMutation = useMutation({
+    mutationFn: async (commentId: number) => {
+      return await apiRequest('DELETE', `/api/comments/${commentId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
+      toast({
+        title: "Comment deleted",
+        description: "The comment has been removed",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete comment",
         variant: "destructive",
       });
     },
@@ -160,30 +182,42 @@ export function CommentSection({ comments }: CommentSectionProps) {
                   return <IconComponent className={`h-4 w-4 ${getIconColor(comment.id)}`} />;
                 })()}
               </div>
-              <div className="flex-1 flex justify-between">
-                <div className="flex-1">
-                  <div className="mb-2">
-                    <span className="text-base md:text-sm font-medium text-slate-800">{getAnonymousName(comment.id)}</span>
-                    {!comment.isBot && (
-                      <div className="block md:inline md:ml-2">
-                        <span className="text-sm md:text-xs text-slate-500">{formatTimeAgo(comment.createdAt)}</span>
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-slate-700 text-base md:text-sm whitespace-pre-wrap">{comment.content}</p>
+              <div className="flex-1">
+                <div className="mb-2">
+                  <span className="text-base md:text-sm font-medium text-slate-800">{getAnonymousName(comment.id)}</span>
+                  {!comment.isBot && (
+                    <div className="block md:inline md:ml-2">
+                      <span className="text-sm md:text-xs text-slate-500">{formatTimeAgo(comment.createdAt)}</span>
+                    </div>
+                  )}
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => likeCommentMutation.mutate(comment.id)}
-                  className={`justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent rounded-md flex items-center space-x-1 transition-colors p-0 h-auto self-start pl-[0px] pr-[0px] pt-[0px] pb-[0px] mt-[16px] mb-[16px] ml-[10px] mr-[10px] ${
-                    likedComments.has(comment.id) ? 'text-pink-500' : 'text-slate-500 hover:text-red-500'
-                  }`}
-                  disabled={likeCommentMutation.isPending}
-                >
-                  <Heart className={`h-3 w-3 ${likedComments.has(comment.id) ? 'fill-pink-500' : ''}`} />
-                  <span className="text-xs">{comment.likes}</span>
-                </Button>
+                <p className="text-slate-700 text-base md:text-sm whitespace-pre-wrap mb-2">{comment.content}</p>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => likeCommentMutation.mutate(comment.id)}
+                    className={`flex items-center space-x-1 transition-colors p-0 h-auto ${
+                      likedComments.has(comment.id) ? 'text-pink-500' : 'text-slate-500 hover:text-red-500'
+                    }`}
+                    disabled={likeCommentMutation.isPending}
+                  >
+                    <Heart className={`h-3 w-3 ${likedComments.has(comment.id) ? 'fill-pink-500' : ''}`} />
+                    <span className="text-xs">{comment.likes}</span>
+                  </Button>
+                  {isAdmin && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteCommentMutation.mutate(comment.id)}
+                      className="flex items-center space-x-1 text-slate-500 hover:text-red-500 transition-colors p-0 h-auto"
+                      disabled={deleteCommentMutation.isPending}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      <span className="text-xs">Delete</span>
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           )}

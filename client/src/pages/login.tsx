@@ -26,7 +26,9 @@ export default function Login() {
       });
 
       if (response.ok) {
+        const data = await response.json();
         localStorage.setItem("anonymousboard_auth", "true");
+        localStorage.setItem("anonymousboard_admin", data.isAdmin ? "true" : "false");
         setLocation("/board");
       } else {
         toast({
