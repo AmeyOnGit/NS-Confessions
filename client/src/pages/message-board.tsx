@@ -149,10 +149,14 @@ export default function MessageBoard() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center mr-3">
-                <MessageCircle className="h-4 w-4 text-primary-foreground" />
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center mr-3 shadow-sm">
+                <img 
+                  src="/attached_assets/Screenshot_2025-07-05_at_16.37.55-removebg-preview_1751705082388.png" 
+                  alt="NS Confessions Logo" 
+                  className="h-5 w-5 object-contain"
+                />
               </div>
-              <h1 className="text-xl font-bold text-slate-800">Anonymous Board</h1>
+              <h1 className="text-xl font-bold text-slate-800">NS Confessions</h1>
               <span className="ml-3 px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-full">
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full mr-1"></div>

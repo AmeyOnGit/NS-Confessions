@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Lock, ArrowRight, Shield } from "lucide-react";
+import { ArrowRight, Shield } from "lucide-react";
 
 export default function Login() {
   const [password, setPassword] = useState("");
@@ -50,11 +50,15 @@ export default function Login() {
       <Card className="w-full max-w-md shadow-xl">
         <CardContent className="pt-8 p-8">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-              <Lock className="h-6 w-6 text-primary-foreground" />
+            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <img 
+                src="/attached_assets/Screenshot_2025-07-05_at_16.37.55-removebg-preview_1751705082388.png" 
+                alt="NS Confessions Logo" 
+                className="h-8 w-8 object-contain"
+              />
             </div>
-            <h1 className="text-2xl font-bold text-slate-800 mb-2">Access Required</h1>
-            <p className="text-slate-600">Enter the password to access the anonymous message board</p>
+            <h1 className="text-2xl font-bold text-slate-800 mb-2">NS Confessions</h1>
+            <p className="text-slate-600">Enter the NS WiFi password to gain access.</p>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -75,7 +79,8 @@ export default function Login() {
             
             <Button
               type="submit"
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="w-full text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2"
+              style={{ backgroundColor: '#0f162b', borderColor: '#0f162b' }}
               disabled={isLoading}
             >
               {isLoading ? (
@@ -83,7 +88,7 @@ export default function Login() {
               ) : (
                 <>
                   <ArrowRight className="h-4 w-4 mr-2" />
-                  Access Message Board
+                  Access NS Confessions
                 </>
               )}
             </Button>
@@ -92,7 +97,7 @@ export default function Login() {
           <div className="mt-6 text-center">
             <p className="text-xs text-slate-500 flex items-center justify-center">
               <Shield className="h-3 w-3 mr-1" />
-              Your messages will be completely anonymous
+              Your messages are completely anonymous
             </p>
           </div>
         </CardContent>

@@ -1,8 +1,8 @@
-# Anonymous Message Board Application
+# NS Confessions - Anonymous Message Board Application
 
 ## Overview
 
-This is a full-stack web application for a password-protected anonymous message board. Users authenticate with a shared password to access the board where they can post anonymous messages, like posts, and comment on them. The application features an AI bot that automatically responds to new messages with witty or sarcastic replies.
+This is a full-stack web application for a password-protected anonymous message board called "NS Confessions". Users authenticate with a shared password ("darktalent2024!") to access the board where they can post anonymous messages, like posts, and comment on them. The application features an AI bot called "RoastBot" that automatically responds to new messages with witty or sarcastic replies using a free Hugging Face API.
 
 ## System Architecture
 
@@ -44,8 +44,9 @@ This is a full-stack web application for a password-protected anonymous message 
 - **Thread View**: Expandable comment sections for each message
 
 ### AI Bot Integration
-- **Auto-replies**: AI bot automatically comments on new messages
-- **Provider**: OpenAI API integration
+- **Auto-replies**: AI bot "RoastBot" automatically comments on new messages
+- **Provider**: Free Hugging Face Inference API (microsoft/DialoGPT-medium)
+- **Fallback**: Preset witty responses when API is unavailable
 - **Personality**: Witty, sarcastic, and roasting responses
 - **UI Distinction**: Bot comments styled differently with special indicators
 
@@ -89,8 +90,8 @@ This is a full-stack web application for a password-protected anonymous message 
 3. **Database**: Drizzle pushes schema changes to PostgreSQL
 
 ### Environment Variables
-- `DATABASE_URL`: PostgreSQL connection string
-- `OPENAI_API_KEY`: OpenAI API key for bot responses
+- `DATABASE_URL`: PostgreSQL connection string (optional - uses in-memory storage)
+- `HUGGINGFACE_API_KEY`: Optional Hugging Face API key for bot responses
 - `NODE_ENV`: Environment setting (development/production)
 
 ### Production Setup
