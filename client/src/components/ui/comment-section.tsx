@@ -153,7 +153,7 @@ export function CommentSection({ comments, isAdmin = false }: CommentSectionProp
         <div key={comment.id}>
           {comment.isBot ? (
             // AI Bot Comment
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            (<div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
               <div className="flex items-start space-x-3">
                 <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
                   <Bot className="h-4 w-4 text-white" />
@@ -172,10 +172,10 @@ export function CommentSection({ comments, isAdmin = false }: CommentSectionProp
                   <p className="text-amber-800 text-sm whitespace-pre-wrap">{comment.content}</p>
                 </div>
               </div>
-            </div>
+            </div>)
           ) : (
             // User Comment
-            <div className="flex items-start space-x-3">
+            (<div className="flex items-start space-x-3">
               <div className={`w-8 h-8 ${getBgColor(comment.id)} rounded-full flex items-center justify-center`}>
                 {(() => {
                   const IconComponent = getCommentIcon(comment.id);
@@ -199,9 +199,7 @@ export function CommentSection({ comments, isAdmin = false }: CommentSectionProp
                     variant="ghost"
                     size="sm"
                     onClick={() => likeCommentMutation.mutate(comment.id)}
-                    className={`flex items-center space-x-1 transition-colors p-0 h-auto ${
-                      likedComments.has(comment.id) ? 'text-pink-500' : 'text-slate-500 hover:text-red-500'
-                    }`}
+                    className="justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent rounded-md flex items-center space-x-1 transition-colors p-0 h-auto text-slate-500 hover:text-red-500 mt-[26px] mb-[26px] ml-[6px] mr-[6px] pt-[0px] pb-[0px]"
                     disabled={likeCommentMutation.isPending}
                   >
                     <Heart className={`h-3 w-3 ${likedComments.has(comment.id) ? 'fill-pink-500' : ''}`} />
@@ -221,7 +219,7 @@ export function CommentSection({ comments, isAdmin = false }: CommentSectionProp
                   )}
                 </div>
               </div>
-            </div>
+            </div>)
           )}
         </div>
       ))}
