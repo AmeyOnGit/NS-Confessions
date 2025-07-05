@@ -211,13 +211,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Invalid message content' });
       }
       
-      // Sanitize content (basic XSS protection)
-      const sanitizedContent = result.data.content
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#x27;')
-        .trim();
+      // Sanitize content (basic cleaning)
+      const sanitizedContent = result.data.content.trim();
       
       if (sanitizedContent.length === 0 || sanitizedContent.length > 500) {
         return res.status(400).json({ error: 'Message must be between 1 and 500 characters' });
@@ -229,29 +224,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ipAddress
       });
       
-      // Generate AI bot response
-      const botResponse = await generateBotResponse(sanitizedContent);
-      const botComment = await storage.createComment({
-        messageId: message.id,
-        content: botResponse,
-        isBot: true,
-        botName: 'RoastBot'
-      });
+
       
       // Broadcast new message to all clients
       broadcast({
         type: 'new_message',
         message: {
           ...message,
-          comments: [botComment],
-          commentCount: 1
+          comments: [],
+          commentCount: 0
         }
       });
       
       res.json({
         ...message,
-        comments: [botComment],
-        commentCount: 1
+        comments: [],
+        commentCount: 0
       });
     } catch (error) {
       console.error('Error creating message:', error);
@@ -309,12 +297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Sanitize content
-      const sanitizedContent = result.data.content
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#x27;')
-        .trim();
+      const sanitizedContent = result.data.content.trim();
       
       if (sanitizedContent.length === 0 || sanitizedContent.length > 500) {
         return res.status(400).json({ error: 'Comment must be between 1 and 500 characters' });
