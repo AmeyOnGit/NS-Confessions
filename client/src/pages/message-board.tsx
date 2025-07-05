@@ -38,7 +38,7 @@ interface Comment {
 export default function MessageBoard() {
   const [, setLocation] = useLocation();
   const [newMessage, setNewMessage] = useState("");
-  const [sortBy, setSortBy] = useState<'newest' | 'most_liked'>('newest');
+  const [sortBy, setSortBy] = useState<'newest' | 'most_liked' | 'most_commented'>('newest');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { connect, disconnect, onMessage, isConnected } = useWebSocket();
@@ -204,7 +204,7 @@ export default function MessageBoard() {
         <Card className="mb-6 shadow-sm border border-slate-200">
           <CardContent className="p-6">
             <div className="flex items-start space-x-4">
-              <div className="w-10 h-10 bg-slate-300 rounded-full flex items-center justify-center">
+              <div className="hidden sm:flex w-10 h-10 bg-slate-300 rounded-full items-center justify-center">
                 <PlusCircle className="h-5 w-5 text-slate-600" />
               </div>
               <div className="flex-1">
@@ -256,7 +256,7 @@ export default function MessageBoard() {
               variant={sortBy === 'newest' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setSortBy('newest')}
-              className="text-sm"
+              className={`text-sm ${sortBy === 'newest' ? 'bg-[#0f162b] hover:bg-[#0f162b]/90' : ''}`}
             >
               Newest
             </Button>
@@ -264,9 +264,17 @@ export default function MessageBoard() {
               variant={sortBy === 'most_liked' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setSortBy('most_liked')}
-              className="text-sm"
+              className={`text-sm ${sortBy === 'most_liked' ? 'bg-[#0f162b] hover:bg-[#0f162b]/90' : ''}`}
             >
               Most Liked
+            </Button>
+            <Button
+              variant={sortBy === 'most_commented' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSortBy('most_commented')}
+              className={`text-sm ${sortBy === 'most_commented' ? 'bg-[#0f162b] hover:bg-[#0f162b]/90' : ''}`}
+            >
+              Most Commented
             </Button>
           </div>
         </div>

@@ -219,7 +219,7 @@ export function MessageCard({ message }: MessageCardProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowComments(!showComments)}
-                className="flex items-center space-x-2 text-slate-500 hover:text-primary transition-colors p-0"
+                className="flex items-center space-x-2 text-slate-500 hover:text-[#0f162b] transition-colors p-0"
               >
                 <MessageCircle className="h-4 w-4" />
                 <span>{message.commentCount}</span>

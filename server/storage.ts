@@ -15,12 +15,12 @@ import {
   type InsertCommentLike
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Messages
   createMessage(message: InsertMessage): Promise<Message>;
-  getMessages(limit?: number, offset?: number, sortBy?: 'newest' | 'most_liked'): Promise<Message[]>;
+  getMessages(limit?: number, offset?: number, sortBy?: 'newest' | 'most_liked' | 'most_commented'): Promise<Message[]>;
   getMessageById(id: number): Promise<Message | undefined>;
   likeMessage(messageId: number): Promise<Message>;
   
@@ -74,11 +74,18 @@ export class MemStorage implements IStorage {
     return message;
   }
 
-  async getMessages(limit: number = 20, offset: number = 0, sortBy: 'newest' | 'most_liked' = 'newest'): Promise<Message[]> {
+  async getMessages(limit: number = 20, offset: number = 0, sortBy: 'newest' | 'most_liked' | 'most_commented' = 'newest'): Promise<Message[]> {
     const allMessages = Array.from(this.messages.values());
     
     if (sortBy === 'most_liked') {
       allMessages.sort((a, b) => b.likes - a.likes);
+    } else if (sortBy === 'most_commented') {
+      // Sort by comment count (count comments for each message)
+      allMessages.sort((a, b) => {
+        const aCommentCount = Array.from(this.comments.values()).filter(c => c.messageId === a.id).length;
+        const bCommentCount = Array.from(this.comments.values()).filter(c => c.messageId === b.id).length;
+        return bCommentCount - aCommentCount;
+      });
     } else {
       allMessages.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     }
@@ -218,17 +225,36 @@ export class DatabaseStorage implements IStorage {
     return message;
   }
 
-  async getMessages(limit: number = 20, offset: number = 0, sortBy: 'newest' | 'most_liked' = 'newest'): Promise<Message[]> {
-    const orderBy = sortBy === 'most_liked' ? desc(messages.likes) : desc(messages.createdAt);
-    
-    const allMessages = await db
-      .select()
-      .from(messages)
-      .orderBy(orderBy)
-      .limit(limit)
-      .offset(offset);
-    
-    return allMessages;
+  async getMessages(limit: number = 20, offset: number = 0, sortBy: 'newest' | 'most_liked' | 'most_commented' = 'newest'): Promise<Message[]> {
+    if (sortBy === 'most_commented') {
+      // Use a subquery to count comments per message and sort by that count
+      const messagesWithCommentCount = await db
+        .select({
+          id: messages.id,
+          content: messages.content,
+          ipAddress: messages.ipAddress,
+          createdAt: messages.createdAt,
+          likes: messages.likes,
+          commentCount: sql<number>`COALESCE(${sql`(SELECT COUNT(*) FROM ${comments} WHERE ${comments.messageId} = ${messages.id})`}, 0)`
+        })
+        .from(messages)
+        .orderBy(desc(sql<number>`COALESCE(${sql`(SELECT COUNT(*) FROM ${comments} WHERE ${comments.messageId} = ${messages.id})`}, 0)`))
+        .limit(limit)
+        .offset(offset);
+      
+      return messagesWithCommentCount;
+    } else {
+      const orderBy = sortBy === 'most_liked' ? desc(messages.likes) : desc(messages.createdAt);
+      
+      const allMessages = await db
+        .select()
+        .from(messages)
+        .orderBy(orderBy)
+        .limit(limit)
+        .offset(offset);
+      
+      return allMessages;
+    }
   }
 
   async getMessageById(id: number): Promise<Message | undefined> {
