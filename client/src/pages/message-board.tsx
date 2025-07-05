@@ -221,7 +221,7 @@ export default function MessageBoard() {
                   <Textarea
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Share your thoughts anonymously..."
+                    placeholder="Forgive me Father for I have sinned..."
                     className="w-full px-4 py-3 border border-slate-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all duration-200 bg-white dark:bg-gray-700 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-gray-400"
                     rows={3}
                     maxLength={500}
