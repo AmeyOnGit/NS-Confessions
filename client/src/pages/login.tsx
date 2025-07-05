@@ -51,11 +51,15 @@ export default function Login() {
         <CardContent className="pt-8 p-8">
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <img 
-                src="/attached_assets/Screenshot_2025-07-05_at_16.37.55-removebg-preview_1751705082388.png" 
-                alt="NS Confessions Logo" 
-                className="h-8 w-8 object-contain"
-              />
+              <svg className="h-8 w-8" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Flag pole */}
+                <rect x="10" y="15" width="3" height="70" fill="#1e293b" />
+                {/* Flag */}
+                <path d="M13 15 L75 15 L75 45 L13 45 Z" fill="#1e40af" stroke="#1e293b" strokeWidth="1" />
+                {/* Cross on flag */}
+                <rect x="38" y="25" width="4" height="15" fill="white" />
+                <rect x="28" y="32" width="24" height="4" fill="white" />
+              </svg>
             </div>
             <h1 className="text-2xl font-bold text-slate-800 mb-2">NS Confessions</h1>
             <p className="text-slate-600">Enter the NS WiFi password to gain access.</p>
