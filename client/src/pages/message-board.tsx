@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { 
   Select,
@@ -67,60 +67,20 @@ export default function MessageBoard() {
     onMessage((data) => {
       switch (data.type) {
         case 'new_message':
-          queryClient.setQueryData(['/api/messages', sortBy], (old: Message[] | undefined) => {
-            return old ? [data.message, ...old] : [data.message];
-          });
+          queryClient.invalidateQueries({ queryKey: ['/api/messages', sortBy] });
           toast({
             title: "New Message",
             description: "A new anonymous message was posted",
           });
           break;
         case 'message_liked':
-          queryClient.setQueryData(['/api/messages', sortBy], (old: Message[] | undefined) => {
-            return old?.map(msg => 
-              msg.id === data.messageId 
-                ? { ...msg, likes: data.likes }
-                : msg
-            );
-          });
+          queryClient.invalidateQueries({ queryKey: ['/api/messages', sortBy] });
           break;
         case 'new_comment':
-          queryClient.setQueryData(['/api/messages', sortBy], (old: Message[] | undefined) => {
-            return old?.map(msg => 
-              msg.id === data.comment.messageId
-                ? { 
-                    ...msg, 
-                    comments: [...msg.comments, data.comment],
-                    commentCount: msg.commentCount + 1
-                  }
-                : msg
-            );
-          });
-          break;
         case 'comment_liked':
-          queryClient.setQueryData(['/api/messages', sortBy], (old: Message[] | undefined) => {
-            return old?.map(msg => ({
-              ...msg,
-              comments: msg.comments.map(comment =>
-                comment.id === data.commentId
-                  ? { ...comment, likes: data.likes }
-                  : comment
-              )
-            }));
-          });
-          break;
         case 'message_deleted':
-          queryClient.setQueryData(['/api/messages', sortBy], (old: Message[] | undefined) => {
-            return old?.filter(msg => msg.id !== data.messageId);
-          });
-          break;
         case 'comment_deleted':
-          queryClient.setQueryData(['/api/messages', sortBy], (old: Message[] | undefined) => {
-            return old?.map(msg => ({
-              ...msg,
-              comments: msg.comments.filter(comment => comment.id !== data.commentId)
-            }));
-          });
+          queryClient.invalidateQueries({ queryKey: ['/api/messages', sortBy] });
           break;
       }
     });
@@ -130,18 +90,54 @@ export default function MessageBoard() {
     };
   }, [connect, disconnect, onMessage, queryClient, toast, sortBy]);
 
-  // Fetch messages
-  const { data: messages = [], isLoading } = useQuery<Message[]>({
+  // Fetch messages with infinite scroll
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['/api/messages', sortBy],
-    queryFn: async () => {
-      const response = await fetch(`/api/messages?sortBy=${sortBy}`);
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await fetch(`/api/messages?sortBy=${sortBy}&limit=20&offset=${pageParam}`);
       if (!response.ok) {
         throw new Error('Failed to fetch messages');
       }
       return response.json() as Promise<Message[]>;
     },
+    getNextPageParam: (lastPage, allPages) => {
+      // If the last page has fewer than 20 messages, we've reached the end
+      if (lastPage.length < 20) {
+        return undefined;
+      }
+      // Return the next offset
+      return allPages.length * 20;
+    },
+    initialPageParam: 0,
     refetchInterval: 30000, // Fallback polling every 30 seconds
   });
+
+  // Flatten all pages into a single array of messages
+  const messages = data?.pages.flat() || [];
+
+  // Infinite scroll with intersection observer
+  const loadMoreRef = useCallback((node: HTMLDivElement | null) => {
+    if (isLoading || isFetchingNextPage) return;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [isLoading, isFetchingNextPage, hasNextPage, fetchNextPage]);
 
   // Submit new message
   const submitMessageMutation = useMutation({
@@ -317,9 +313,40 @@ export default function MessageBoard() {
               </CardContent>
             </Card>
           ) : (
-            messages.map((message) => (
-              <MessageCard key={message.id} message={message} isAdmin={isAdmin} />
-            ))
+            <>
+              {messages.map((message) => (
+                <MessageCard key={message.id} message={message} isAdmin={isAdmin} />
+              ))}
+              
+              {/* Infinite scroll trigger */}
+              {hasNextPage && (
+                <div 
+                  ref={loadMoreRef}
+                  className="flex justify-center py-8"
+                >
+                  {isFetchingNextPage ? (
+                    <div className="flex items-center space-x-2 text-slate-600">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                      <span>Loading more messages...</span>
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={() => fetchNextPage()}
+                      variant="outline"
+                      className="text-slate-600 hover:text-slate-800"
+                    >
+                      Load more messages
+                    </Button>
+                  )}
+                </div>
+              )}
+              
+              {!hasNextPage && messages.length > 0 && (
+                <div className="text-center py-8 text-slate-500">
+                  <p>You've reached the very beginning! 🎉</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
