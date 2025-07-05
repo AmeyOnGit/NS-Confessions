@@ -149,15 +149,16 @@ export default function MessageBoard() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center mr-3 shadow-sm">
-                <svg className="h-5 w-5" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <div className="mr-3">
+                <svg className="h-6 w-8" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg">
                   {/* Flag pole */}
-                  <rect x="10" y="15" width="3" height="70" fill="#1e293b" />
-                  {/* Flag */}
-                  <path d="M13 15 L75 15 L75 45 L13 45 Z" fill="#1e40af" stroke="#1e293b" strokeWidth="1" />
+                  <rect x="8" y="10" width="4" height="60" fill="#374151" />
+                  <circle cx="10" cy="10" r="3" fill="#374151" />
+                  {/* Flag with wavy effect */}
+                  <path d="M12 15 C50 15 60 20 90 15 C100 25 90 35 90 40 C60 45 50 40 12 40 Z" fill="#1e3a8a" />
                   {/* Cross on flag */}
-                  <rect x="38" y="25" width="4" height="15" fill="white" />
-                  <rect x="28" y="32" width="24" height="4" fill="white" />
+                  <rect x="45" y="22" width="6" height="16" fill="white" />
+                  <rect x="35" y="27" width="26" height="6" fill="white" />
                 </svg>
               </div>
               <h1 className="text-xl font-bold text-slate-800">NS Confessions</h1>
