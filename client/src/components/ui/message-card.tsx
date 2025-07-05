@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
   Trash2,
+  TrendingDown,
   User,
   UserX,
   Ghost,
@@ -52,6 +53,7 @@ interface Message {
   likes: number;
   comments: Comment[];
   commentCount: number;
+  demoted?: boolean;
 }
 
 interface MessageCardProps {
@@ -126,6 +128,26 @@ export function MessageCard({ message, isAdmin = false }: MessageCardProps) {
       toast({
         title: "Error",
         description: error.message || "Failed to delete message",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const demoteMessageMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest('POST', `/api/messages/${message.id}/demote`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
+      toast({
+        title: "Message demoted",
+        description: "This message will no longer rise with new comments",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to demote message",
         variant: "destructive",
       });
     },
@@ -253,16 +275,28 @@ export function MessageCard({ message, isAdmin = false }: MessageCardProps) {
               </Button>
               
               {isAdmin && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => deleteMessageMutation.mutate()}
-                  className="flex items-center space-x-2 text-slate-500 hover:text-red-500 transition-colors p-0"
-                  disabled={deleteMessageMutation.isPending}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  <span>Delete</span>
-                </Button>
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => demoteMessageMutation.mutate()}
+                    className="flex items-center space-x-2 text-slate-500 hover:text-orange-500 transition-colors p-0"
+                    disabled={demoteMessageMutation.isPending || message.demoted}
+                  >
+                    <TrendingDown className="h-4 w-4" />
+                    <span>{message.demoted ? "Demoted" : "Demote"}</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteMessageMutation.mutate()}
+                    className="flex items-center space-x-2 text-slate-500 hover:text-red-500 transition-colors p-0"
+                    disabled={deleteMessageMutation.isPending}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span>Delete</span>
+                  </Button>
+                </>
               )}
 
             </div>

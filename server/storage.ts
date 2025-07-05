@@ -24,6 +24,7 @@ export interface IStorage {
   getMessageById(id: number): Promise<Message | undefined>;
   likeMessage(messageId: number): Promise<Message>;
   deleteMessage(messageId: number): Promise<void>;
+  demoteMessage(messageId: number): Promise<Message>;
   
   // Comments
   createComment(comment: InsertComment): Promise<Comment>;
@@ -67,6 +68,7 @@ export class MemStorage implements IStorage {
       ipAddress: insertMessage.ipAddress,
       createdAt: new Date(),
       likes: 0,
+      demoted: false,
     };
     this.messages.set(id, message);
     return message;
@@ -94,9 +96,9 @@ export class MemStorage implements IStorage {
         const aLatestComment = aComments.length > 0 ? Math.max(...aComments.map(c => c.createdAt.getTime())) : 0;
         const bLatestComment = bComments.length > 0 ? Math.max(...bComments.map(c => c.createdAt.getTime())) : 0;
         
-        // Compare the most recent activity (message creation or latest comment)
-        const aLatestActivity = Math.max(a.createdAt.getTime(), aLatestComment);
-        const bLatestActivity = Math.max(b.createdAt.getTime(), bLatestComment);
+        // For demoted messages, only use message creation time, not comment activity
+        const aLatestActivity = a.demoted ? a.createdAt.getTime() : Math.max(a.createdAt.getTime(), aLatestComment);
+        const bLatestActivity = b.demoted ? b.createdAt.getTime() : Math.max(b.createdAt.getTime(), bLatestComment);
         
         return bLatestActivity - aLatestActivity;
       });
@@ -136,6 +138,17 @@ export class MemStorage implements IStorage {
       return like?.messageId === messageId;
     });
     likesToDelete.forEach(id => this.likes.delete(id));
+  }
+
+  async demoteMessage(messageId: number): Promise<Message> {
+    const message = this.messages.get(messageId);
+    if (!message) {
+      throw new Error("Message not found");
+    }
+    
+    const updatedMessage = { ...message, demoted: true };
+    this.messages.set(messageId, updatedMessage);
+    return updatedMessage;
   }
 
   async createComment(insertComment: InsertComment): Promise<Comment> {
@@ -243,6 +256,7 @@ export class DatabaseStorage implements IStorage {
           ipAddress: messages.ipAddress,
           createdAt: messages.createdAt,
           likes: messages.likes,
+          demoted: messages.demoted,
           commentCount: sql<number>`COALESCE(${sql`(SELECT COUNT(*) FROM ${comments} WHERE ${comments.messageId} = ${messages.id})`}, 0)`
         })
         .from(messages)
@@ -260,10 +274,14 @@ export class DatabaseStorage implements IStorage {
           ipAddress: messages.ipAddress,
           createdAt: messages.createdAt,
           likes: messages.likes,
-          latestActivity: sql<Date>`GREATEST(
-            ${messages.createdAt},
-            COALESCE((SELECT MAX(${comments.createdAt}) FROM ${comments} WHERE ${comments.messageId} = ${messages.id}), ${messages.createdAt})
-          )`
+          demoted: messages.demoted,
+          latestActivity: sql<Date>`CASE 
+            WHEN ${messages.demoted} = true THEN ${messages.createdAt}
+            ELSE GREATEST(
+              ${messages.createdAt},
+              COALESCE((SELECT MAX(${comments.createdAt}) FROM ${comments} WHERE ${comments.messageId} = ${messages.id}), ${messages.createdAt})
+            )
+          END`
         })
         .from(messages)
         .orderBy(desc(sql<Date>`GREATEST(
@@ -403,6 +421,20 @@ export class DatabaseStorage implements IStorage {
     
     // Delete the message
     await db.delete(messages).where(eq(messages.id, messageId));
+  }
+
+  async demoteMessage(messageId: number): Promise<Message> {
+    const [updatedMessage] = await db
+      .update(messages)
+      .set({ demoted: true })
+      .where(eq(messages.id, messageId))
+      .returning();
+    
+    if (!updatedMessage) {
+      throw new Error("Message not found");
+    }
+    
+    return updatedMessage;
   }
 
   async deleteComment(commentId: number): Promise<void> {

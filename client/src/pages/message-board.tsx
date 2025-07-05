@@ -30,6 +30,7 @@ interface Message {
   likes: number;
   comments: Comment[];
   commentCount: number;
+  demoted?: boolean;
 }
 
 interface Comment {
@@ -82,6 +83,7 @@ export default function MessageBoard() {
         case 'comment_liked':
         case 'message_deleted':
         case 'comment_deleted':
+        case 'message_demoted':
           queryClient.invalidateQueries({ queryKey: ['/api/messages', sortBy] });
           queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
           break;

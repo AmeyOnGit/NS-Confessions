@@ -8,6 +8,7 @@ export const messages = pgTable("messages", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   likes: integer("likes").default(0).notNull(),
   ipAddress: text("ip_address").notNull(),
+  demoted: boolean("demoted").default(false).notNull(),
 });
 
 export const comments = pgTable("comments", {

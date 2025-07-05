@@ -322,6 +322,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin-only demote message route
+  app.post('/api/messages/:id/demote', async (req, res) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      const updatedMessage = await storage.demoteMessage(messageId);
+      
+      // Broadcast demote to all clients
+      broadcast({
+        type: 'message_demoted',
+        messageId,
+        message: updatedMessage
+      });
+      
+      res.json(updatedMessage);
+    } catch (error) {
+      console.error('Error demoting message:', error);
+      res.status(500).json({ error: 'Failed to demote message' });
+    }
+  });
+
   app.delete('/api/comments/:id', async (req, res) => {
     try {
       const commentId = parseInt(req.params.id);
