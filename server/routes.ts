@@ -1,0 +1,364 @@
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
+import { storage } from "./storage";
+import { insertMessageSchema, insertCommentSchema } from "@shared/schema";
+import { z } from "zod";
+// Using Hugging Face Inference API for free AI responses
+const HF_API_URL = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium";
+const HF_API_KEY = process.env.HUGGINGFACE_API_KEY || ""; // Optional, works without auth but with rate limits
+
+const PASSWORD = "darktalent2024!";
+
+interface WebSocketClient extends WebSocket {
+  isAlive?: boolean;
+}
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  const httpServer = createServer(app);
+  
+  // WebSocket server for real-time updates
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  
+  const clients = new Set<WebSocketClient>();
+  
+  wss.on('connection', (ws: WebSocketClient) => {
+    console.log('New WebSocket connection');
+    ws.isAlive = true;
+    clients.add(ws);
+    
+    ws.on('pong', () => {
+      ws.isAlive = true;
+    });
+    
+    ws.on('close', () => {
+      clients.delete(ws);
+    });
+    
+    ws.on('error', (error) => {
+      console.error('WebSocket error:', error);
+      clients.delete(ws);
+    });
+  });
+  
+  // Heartbeat to keep connections alive
+  setInterval(() => {
+    clients.forEach((ws) => {
+      if (!ws.isAlive) {
+        clients.delete(ws);
+        return ws.terminate();
+      }
+      ws.isAlive = false;
+      ws.ping();
+    });
+  }, 30000);
+  
+  // Broadcast to all connected clients
+  function broadcast(data: any) {
+    const message = JSON.stringify(data);
+    clients.forEach((ws) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(message);
+      }
+    });
+  }
+  
+  // Generate AI bot response using Hugging Face API
+  async function generateBotResponse(messageContent: string): Promise<string> {
+    try {
+      // Create a simple prompt for the model
+      const prompt = `Human: ${messageContent}\nRoastBot: `;
+      
+      const response = await fetch(HF_API_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': HF_API_KEY ? `Bearer ${HF_API_KEY}` : '',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          inputs: prompt,
+          parameters: {
+            max_new_tokens: 50,
+            temperature: 0.9,
+            do_sample: true,
+            return_full_text: false,
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Handle different response formats
+      let botResponse = '';
+      if (Array.isArray(data) && data.length > 0) {
+        botResponse = data[0].generated_text || '';
+      } else if (data.generated_text) {
+        botResponse = data.generated_text;
+      }
+      
+      // Clean up the response
+      botResponse = botResponse.replace(prompt, '').trim();
+      
+      // Fallback to preset responses if API fails or returns empty
+      if (!botResponse || botResponse.length < 3) {
+        return getRandomFallbackResponse(messageContent);
+      }
+      
+      // Limit response length
+      if (botResponse.length > 200) {
+        botResponse = botResponse.substring(0, 200) + '...';
+      }
+      
+      return botResponse;
+    } catch (error) {
+      console.error('Hugging Face API error:', error);
+      return getRandomFallbackResponse(messageContent);
+    }
+  }
+
+  // Fallback responses when AI API fails
+  function getRandomFallbackResponse(messageContent: string): string {
+    const responses = [
+      "Wow, that's... something. 🤖",
+      "I've seen better messages on a broken screen. 🤖",
+      "My circuits are still processing this level of creativity. 🤖",
+      "Anonymous and yet somehow still embarrassing. 🤖",
+      "I'd roast this but I'm worried about starting a fire. 🤖",
+      "This message brought to you by the letter 'Meh'. 🤖",
+      "I'm just here for the chaos, but this is mild. 🤖",
+      "Even my AI brain needs a moment to process this. 🤖",
+      "Bold of you to assume I have words for this. 🤖",
+      "My sarcasm module is having trouble computing. 🤖"
+    ];
+    
+    // Simple hash based on message content for consistent responses
+    const hash = messageContent.split('').reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0);
+    
+    return responses[Math.abs(hash) % responses.length];
+  }
+  
+  // Get client IP address
+  function getClientIP(req: any): string {
+    return req.ip || req.connection.remoteAddress || req.socket.remoteAddress || 'unknown';
+  }
+  
+  // Authentication middleware
+  app.use('/api/auth', (req, res, next) => {
+    const { password } = req.body;
+    if (password !== PASSWORD) {
+      return res.status(401).json({ error: 'Invalid password' });
+    }
+    next();
+  });
+  
+  // Password verification
+  app.post('/api/auth/login', (req, res) => {
+    const { password } = req.body;
+    if (password === PASSWORD) {
+      res.json({ success: true });
+    } else {
+      res.status(401).json({ error: 'Invalid password' });
+    }
+  });
+  
+  // Get messages with comments
+  app.get('/api/messages', async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const offset = parseInt(req.query.offset as string) || 0;
+      
+      const messages = await storage.getMessages(limit, offset);
+      
+      // Get comments for each message
+      const messagesWithComments = await Promise.all(
+        messages.map(async (message) => {
+          const comments = await storage.getCommentsByMessageId(message.id);
+          return {
+            ...message,
+            comments,
+            commentCount: comments.length
+          };
+        })
+      );
+      
+      res.json(messagesWithComments);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      res.status(500).json({ error: 'Failed to fetch messages' });
+    }
+  });
+  
+  // Create new message
+  app.post('/api/messages', async (req, res) => {
+    try {
+      const ipAddress = getClientIP(req);
+      
+      // Check rate limit
+      const canPost = await storage.canUserPostMessage(ipAddress);
+      if (!canPost) {
+        return res.status(429).json({ error: 'Rate limit exceeded. Please wait before posting again.' });
+      }
+      
+      // Validate input
+      const result = insertMessageSchema.safeParse({
+        content: req.body.content,
+        ipAddress
+      });
+      
+      if (!result.success) {
+        return res.status(400).json({ error: 'Invalid message content' });
+      }
+      
+      // Sanitize content (basic XSS protection)
+      const sanitizedContent = result.data.content
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;')
+        .trim();
+      
+      if (sanitizedContent.length === 0 || sanitizedContent.length > 500) {
+        return res.status(400).json({ error: 'Message must be between 1 and 500 characters' });
+      }
+      
+      // Create message
+      const message = await storage.createMessage({
+        content: sanitizedContent,
+        ipAddress
+      });
+      
+      // Update rate limit
+      await storage.updateRateLimit(ipAddress);
+      
+      // Generate AI bot response
+      const botResponse = await generateBotResponse(sanitizedContent);
+      const botComment = await storage.createComment({
+        messageId: message.id,
+        content: botResponse,
+        isBot: true,
+        botName: 'RoastBot'
+      });
+      
+      // Broadcast new message to all clients
+      broadcast({
+        type: 'new_message',
+        message: {
+          ...message,
+          comments: [botComment],
+          commentCount: 1
+        }
+      });
+      
+      res.json({
+        ...message,
+        comments: [botComment],
+        commentCount: 1
+      });
+    } catch (error) {
+      console.error('Error creating message:', error);
+      res.status(500).json({ error: 'Failed to create message' });
+    }
+  });
+  
+  // Like a message
+  app.post('/api/messages/:id/like', async (req, res) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      const ipAddress = getClientIP(req);
+      
+      // Check if user already liked this message
+      const hasLiked = await storage.hasUserLikedMessage(messageId, ipAddress);
+      if (hasLiked) {
+        return res.status(400).json({ error: 'You have already liked this message' });
+      }
+      
+      // Create like record
+      await storage.createLike({ messageId, ipAddress });
+      
+      // Update message like count
+      const updatedMessage = await storage.likeMessage(messageId);
+      
+      // Broadcast like update to all clients
+      broadcast({
+        type: 'message_liked',
+        messageId,
+        likes: updatedMessage.likes
+      });
+      
+      res.json(updatedMessage);
+    } catch (error) {
+      console.error('Error liking message:', error);
+      res.status(500).json({ error: 'Failed to like message' });
+    }
+  });
+  
+  // Add comment to message
+  app.post('/api/messages/:id/comments', async (req, res) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      const ipAddress = getClientIP(req);
+      
+      // Validate input
+      const result = insertCommentSchema.safeParse({
+        messageId,
+        content: req.body.content,
+        isBot: false
+      });
+      
+      if (!result.success) {
+        return res.status(400).json({ error: 'Invalid comment content' });
+      }
+      
+      // Sanitize content
+      const sanitizedContent = result.data.content
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;')
+        .trim();
+      
+      if (sanitizedContent.length === 0 || sanitizedContent.length > 500) {
+        return res.status(400).json({ error: 'Comment must be between 1 and 500 characters' });
+      }
+      
+      // Create comment
+      const comment = await storage.createComment({
+        messageId,
+        content: sanitizedContent,
+        isBot: false
+      });
+      
+      // Broadcast new comment to all clients
+      broadcast({
+        type: 'new_comment',
+        comment
+      });
+      
+      res.json(comment);
+    } catch (error) {
+      console.error('Error creating comment:', error);
+      res.status(500).json({ error: 'Failed to create comment' });
+    }
+  });
+  
+  // Get comments for a message
+  app.get('/api/messages/:id/comments', async (req, res) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      const comments = await storage.getCommentsByMessageId(messageId);
+      res.json(comments);
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+      res.status(500).json({ error: 'Failed to fetch comments' });
+    }
+  });
+
+  return httpServer;
+}
