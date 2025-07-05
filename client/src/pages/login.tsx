@@ -98,7 +98,7 @@ export default function Login() {
           </form>
           
           <div className="mt-6 text-center">
-            <p className="text-sm text-slate-500 mb-3">
+            <p className="text-slate-500 mb-3 font-medium text-[13px]">
               Vibecoded at an NS learnathon by{' '}
               <a 
                 href="https://x.com/ameyonx" 
