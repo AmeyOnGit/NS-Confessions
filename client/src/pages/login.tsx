@@ -96,6 +96,17 @@ export default function Login() {
           </form>
           
           <div className="mt-6 text-center">
+            <p className="text-xs text-slate-500 mb-3">
+              Vibecoded at an NS learnathon by{' '}
+              <a 
+                href="https://x.com/ameyonx" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 underline"
+              >
+                @AmeyOnX
+              </a>
+            </p>
             <p className="text-xs text-slate-500 flex items-center justify-center">
               <Shield className="h-3 w-3 mr-1" />
               Your messages are completely anonymous
