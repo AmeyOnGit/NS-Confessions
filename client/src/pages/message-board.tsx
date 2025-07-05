@@ -182,7 +182,7 @@ export default function MessageBoard() {
                   className="h-6 w-auto object-contain"
                 />
               </div>
-              <h1 className="text-xl font-bold text-slate-800">NS Confessions</h1>
+              <h1 className="text-2xl md:text-xl font-bold text-slate-800">NS Confessions</h1>
               <span className="ml-3 px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-full">
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full mr-1"></div>
@@ -219,7 +219,7 @@ export default function MessageBoard() {
                   <Textarea
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Share your thoughts anonymously..."
+                    placeholder="Forgive me Father for I have sinned. . ."
                     className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all duration-200"
                     rows={3}
                     maxLength={500}
@@ -256,7 +256,7 @@ export default function MessageBoard() {
 
         {/* Sorting Controls */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-slate-800">Messages</h2>
+          <h2 className="text-xl md:text-lg font-semibold text-slate-800">Messages</h2>
           <div className="flex items-center space-x-2">
             <span className="text-sm text-slate-600">Sort by:</span>
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'newest' | 'most_liked' | 'most_commented')}>

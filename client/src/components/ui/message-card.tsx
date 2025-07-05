@@ -187,8 +187,8 @@ export function MessageCard({ message }: MessageCardProps) {
           </div>
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-3">
-              <span className="text-sm font-medium text-slate-800">{getAnonymousName()}</span>
-              <span className="text-xs text-slate-500">{formatTimeAgo(message.createdAt)}</span>
+              <span className="text-base md:text-sm font-medium text-slate-800">{getAnonymousName()}</span>
+              <span className="text-sm md:text-xs text-slate-500">{formatTimeAgo(message.createdAt)}</span>
               {Date.now() - new Date(message.createdAt).getTime() < 300000 && (
                 <span className="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-full">
                   <div className="flex items-center">
@@ -199,7 +199,7 @@ export function MessageCard({ message }: MessageCardProps) {
               )}
             </div>
             
-            <p className="text-slate-700 mb-2 leading-relaxed whitespace-pre-wrap">
+            <p className="text-slate-700 mb-2 leading-relaxed whitespace-pre-wrap text-base md:text-sm">
               {message.content}
             </p>
             
@@ -244,7 +244,7 @@ export function MessageCard({ message }: MessageCardProps) {
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       placeholder="Add an anonymous comment..."
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none text-sm"
+                      className="w-full px-3 py-1 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none text-sm"
                       rows={1}
                       maxLength={500}
                     />
