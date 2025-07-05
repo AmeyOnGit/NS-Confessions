@@ -44,16 +44,10 @@ This is a full-stack web application for a password-protected anonymous message 
 - **Thread View**: Expandable comment sections for each message
 
 ### AI Bot Integration
-- **Auto-replies**: AI bot "RoastBot" automatically comments on new messages
-- **Provider**: Free Hugging Face Inference API (microsoft/DialoGPT-medium)
-- **Fallback**: Preset witty responses when API is unavailable
-- **Personality**: Witty, sarcastic, and roasting responses
-- **UI Distinction**: Bot comments styled differently with special indicators
+- **Status**: Removed per user request - no automated bot responses
 
 ### Anti-Spam Protection
-- **Rate Limiting**: IP-based restrictions (1 message per minute per IP)
-- **Storage**: Rate limit tracking in database
-- **Validation**: Server-side enforcement of posting limits
+- **Status**: Removed per user request - users can post unlimited messages
 
 ## Data Flow
 
@@ -105,6 +99,12 @@ This is a full-stack web application for a password-protected anonymous message 
 ```
 Changelog:
 - July 05, 2025. Initial setup
+- July 05, 2025. Bug fixes and improvements:
+  - Removed AI bot functionality per user request
+  - Removed rate limiting functionality per user request
+  - Fixed WebSocket query cache mismatch issues
+  - Changed comment button color to #0f162b
+  - Reduced message card padding for better spacing
 ```
 
 ## User Preferences

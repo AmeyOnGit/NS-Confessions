@@ -34,10 +34,6 @@ export interface IStorage {
   hasUserLikedMessage(messageId: number, ipAddress: string): Promise<boolean>;
   createCommentLike(commentLike: InsertCommentLike): Promise<CommentLike>;
   hasUserLikedComment(commentId: number, ipAddress: string): Promise<boolean>;
-  
-  // Rate limiting
-  canUserPostMessage(ipAddress: string): Promise<boolean>;
-  updateRateLimit(ipAddress: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -172,33 +168,7 @@ export class MemStorage implements IStorage {
     return false;
   }
 
-  async canUserPostMessage(ipAddress: string): Promise<boolean> {
-    const rateLimit = this.rateLimits.get(ipAddress);
-    
-    if (!rateLimit) {
-      return true;
-    }
-    
-    const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
-    return rateLimit.lastMessageTime < oneMinuteAgo;
-  }
-
-  async updateRateLimit(ipAddress: string): Promise<void> {
-    const existing = this.rateLimits.get(ipAddress);
-    
-    if (existing) {
-      const updated = { ...existing, lastMessageTime: new Date() };
-      this.rateLimits.set(ipAddress, updated);
-    } else {
-      const id = this.currentRateLimitId++;
-      const newRateLimit: RateLimit = {
-        id,
-        ipAddress,
-        lastMessageTime: new Date(),
-      };
-      this.rateLimits.set(ipAddress, newRateLimit);
-    }
-  }
+  // Rate limiting functionality removed per user request
 }
 
 export class DatabaseStorage implements IStorage {
@@ -363,40 +333,7 @@ export class DatabaseStorage implements IStorage {
     return !!existingLike;
   }
 
-  async canUserPostMessage(ipAddress: string): Promise<boolean> {
-    const [rateLimit] = await db
-      .select()
-      .from(rateLimits)
-      .where(eq(rateLimits.ipAddress, ipAddress));
-    
-    if (!rateLimit) {
-      return true;
-    }
-    
-    const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
-    return rateLimit.lastMessageTime < oneMinuteAgo;
-  }
-
-  async updateRateLimit(ipAddress: string): Promise<void> {
-    const [existing] = await db
-      .select()
-      .from(rateLimits)
-      .where(eq(rateLimits.ipAddress, ipAddress));
-    
-    if (existing) {
-      await db
-        .update(rateLimits)
-        .set({ lastMessageTime: new Date() })
-        .where(eq(rateLimits.ipAddress, ipAddress));
-    } else {
-      await db
-        .insert(rateLimits)
-        .values({
-          ipAddress,
-          lastMessageTime: new Date(),
-        });
-    }
-  }
+  // Rate limiting functionality removed per user request
 }
 
 export const storage = new DatabaseStorage();

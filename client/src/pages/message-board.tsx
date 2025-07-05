@@ -66,7 +66,7 @@ export default function MessageBoard() {
     onMessage((data) => {
       switch (data.type) {
         case 'new_message':
-          queryClient.setQueryData(['messages'], (old: Message[] | undefined) => {
+          queryClient.setQueryData(['/api/messages', sortBy], (old: Message[] | undefined) => {
             return old ? [data.message, ...old] : [data.message];
           });
           toast({
@@ -114,7 +114,7 @@ export default function MessageBoard() {
     return () => {
       disconnect();
     };
-  }, [connect, disconnect, onMessage, queryClient, toast]);
+  }, [connect, disconnect, onMessage, queryClient, toast, sortBy]);
 
   // Fetch messages
   const { data: messages = [], isLoading } = useQuery<Message[]>({

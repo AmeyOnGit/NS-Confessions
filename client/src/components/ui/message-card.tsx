@@ -180,7 +180,7 @@ export function MessageCard({ message }: MessageCardProps) {
 
   return (
     <Card className="shadow-sm border border-slate-200 transition-all duration-200 hover:shadow-md">
-      <CardContent className="p-6">
+      <CardContent className="p-4">
         <div className="flex items-start space-x-4">
           <div className={`w-10 h-10 ${getBgColor()} rounded-full flex items-center justify-center`}>
             {getIcon()}
@@ -231,7 +231,7 @@ export function MessageCard({ message }: MessageCardProps) {
             
             {/* Comments Section */}
             {showComments && (
-              <div className="mt-6 pt-6 border-t border-slate-100">
+              <div className="mt-4 pt-4 border-t border-slate-100">
                 <CommentSection comments={message.comments} />
                 
                 {/* Add Comment Form */}

@@ -4,9 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { insertMessageSchema, insertCommentSchema } from "@shared/schema";
 import { z } from "zod";
-// Using Hugging Face Inference API for free AI responses
-const HF_API_URL = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium";
-const HF_API_KEY = process.env.HUGGINGFACE_API_KEY || ""; // Optional, works without auth but with rate limits
+// AI bot functionality removed per user request
 
 const PASSWORD = "darktalent2024!";
 
@@ -63,86 +61,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }
   
-  // Generate AI bot response using Hugging Face API
-  async function generateBotResponse(messageContent: string): Promise<string> {
-    try {
-      // Create a simple prompt for the model
-      const prompt = `Human: ${messageContent}\nRoastBot: `;
-      
-      const response = await fetch(HF_API_URL, {
-        method: 'POST',
-        headers: {
-          'Authorization': HF_API_KEY ? `Bearer ${HF_API_KEY}` : '',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          inputs: prompt,
-          parameters: {
-            max_new_tokens: 50,
-            temperature: 0.9,
-            do_sample: true,
-            return_full_text: false,
-          }
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      // Handle different response formats
-      let botResponse = '';
-      if (Array.isArray(data) && data.length > 0) {
-        botResponse = data[0].generated_text || '';
-      } else if (data.generated_text) {
-        botResponse = data.generated_text;
-      }
-      
-      // Clean up the response
-      botResponse = botResponse.replace(prompt, '').trim();
-      
-      // Fallback to preset responses if API fails or returns empty
-      if (!botResponse || botResponse.length < 3) {
-        return getRandomFallbackResponse(messageContent);
-      }
-      
-      // Limit response length
-      if (botResponse.length > 200) {
-        botResponse = botResponse.substring(0, 200) + '...';
-      }
-      
-      return botResponse;
-    } catch (error) {
-      console.error('Hugging Face API error:', error);
-      return getRandomFallbackResponse(messageContent);
-    }
-  }
-
-  // Fallback responses when AI API fails
-  function getRandomFallbackResponse(messageContent: string): string {
-    const responses = [
-      "Wow, that's... something. 🤖",
-      "I've seen better messages on a broken screen. 🤖",
-      "My circuits are still processing this level of creativity. 🤖",
-      "Anonymous and yet somehow still embarrassing. 🤖",
-      "I'd roast this but I'm worried about starting a fire. 🤖",
-      "This message brought to you by the letter 'Meh'. 🤖",
-      "I'm just here for the chaos, but this is mild. 🤖",
-      "Even my AI brain needs a moment to process this. 🤖",
-      "Bold of you to assume I have words for this. 🤖",
-      "My sarcasm module is having trouble computing. 🤖"
-    ];
-    
-    // Simple hash based on message content for consistent responses
-    const hash = messageContent.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
-      return a & a;
-    }, 0);
-    
-    return responses[Math.abs(hash) % responses.length];
-  }
+  // AI bot functionality removed per user request
   
   // Get client IP address
   function getClientIP(req: any): string {
@@ -223,8 +142,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         content: sanitizedContent,
         ipAddress
       });
-      
-
       
       // Broadcast new message to all clients
       broadcast({
