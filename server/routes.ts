@@ -173,7 +173,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user already liked this message
       const hasLiked = await storage.hasUserLikedMessage(messageId, ipAddress);
       if (hasLiked) {
-        return res.status(400).json({ error: 'You have already liked this message' });
+        return res.status(400).json({ error: "You've already liked this message." });
       }
       
       // Create like record
@@ -261,7 +261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user already liked this comment
       const hasLiked = await storage.hasUserLikedComment(commentId, ipAddress);
       if (hasLiked) {
-        return res.status(400).json({ error: 'You have already liked this comment' });
+        return res.status(400).json({ error: "You've already liked this comment." });
       }
       
       // Create like record
