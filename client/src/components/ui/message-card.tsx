@@ -179,7 +179,7 @@ export function MessageCard({ message }: MessageCardProps) {
   };
 
   return (
-    <Card className="shadow-sm border border-slate-200 transition-all duration-200 hover:shadow-md">
+    <Card className="shadow-sm border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all duration-200 hover:shadow-md">
       <CardContent className="p-6">
         <div className="flex items-start space-x-4">
           <div className={`w-10 h-10 ${getBgColor()} rounded-full flex items-center justify-center`}>
@@ -187,10 +187,10 @@ export function MessageCard({ message }: MessageCardProps) {
           </div>
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-3">
-              <span className="text-sm font-medium text-slate-800">{getAnonymousName()}</span>
-              <span className="text-xs text-slate-500">{formatTimeAgo(message.createdAt)}</span>
+              <span className="text-sm font-medium text-slate-800 dark:text-white">{getAnonymousName()}</span>
+              <span className="text-xs text-slate-500 dark:text-gray-400">{formatTimeAgo(message.createdAt)}</span>
               {Date.now() - new Date(message.createdAt).getTime() < 300000 && (
-                <span className="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-full">
+                <span className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 text-xs font-medium rounded-full">
                   <div className="flex items-center">
                     <div className="w-2 h-2 bg-emerald-500 rounded-full mr-1 animate-pulse"></div>
                     New
@@ -199,7 +199,7 @@ export function MessageCard({ message }: MessageCardProps) {
               )}
             </div>
             
-            <p className="text-slate-700 mb-2 leading-relaxed whitespace-pre-wrap">
+            <p className="text-slate-700 dark:text-gray-200 mb-2 leading-relaxed whitespace-pre-wrap">
               {message.content}
             </p>
             
@@ -231,7 +231,7 @@ export function MessageCard({ message }: MessageCardProps) {
             
             {/* Comments Section */}
             {showComments && (
-              <div className="mt-6 pt-6 border-t border-slate-100">
+              <div className="mt-6 pt-6 border-t border-slate-100 dark:border-gray-700">
                 <CommentSection comments={message.comments} />
                 
                 {/* Add Comment Form */}
@@ -244,12 +244,12 @@ export function MessageCard({ message }: MessageCardProps) {
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       placeholder="Add an anonymous comment..."
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none text-sm"
+                      className="w-full px-3 py-2 border border-slate-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none text-sm bg-white dark:bg-gray-700 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-gray-400"
                       rows={2}
                       maxLength={500}
                     />
                     <div className="flex justify-between items-center mt-2">
-                      <span className="text-xs text-slate-500">{newComment.length}/500</span>
+                      <span className="text-xs text-slate-500 dark:text-gray-400">{newComment.length}/500</span>
                       <Button
                         type="submit"
                         size="sm"

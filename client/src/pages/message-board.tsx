@@ -20,6 +20,7 @@ import {
   PlusCircle, 
   Send
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import logoImage from "@assets/Screenshot 2025-07-05 at 16.37.55_1751705681308.png";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -169,9 +170,9 @@ export default function MessageBoard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
+      <header className="bg-white dark:bg-gray-800 border-b border-slate-200 dark:border-gray-700 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
@@ -182,8 +183,8 @@ export default function MessageBoard() {
                   className="h-6 w-auto object-contain"
                 />
               </div>
-              <h1 className="text-xl font-bold text-slate-800">NS Confessions</h1>
-              <span className="ml-3 px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-full">
+              <h1 className="text-xl font-bold text-slate-800 dark:text-white">NS Confessions</h1>
+              <span className="ml-3 px-2 py-1 bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 text-xs font-medium rounded-full">
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full mr-1"></div>
                   {isConnected ? 'Live' : 'Offline'}
@@ -192,11 +193,12 @@ export default function MessageBoard() {
             </div>
             
             <div className="flex items-center space-x-4">
+              <ThemeToggle />
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleLogout}
-                className="text-slate-600 hover:text-slate-800"
+                className="text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white"
               >
                 <LogOut className="h-4 w-4" />
               </Button>
@@ -208,11 +210,11 @@ export default function MessageBoard() {
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* New Message Form */}
-        <Card className="mb-6 shadow-sm border border-slate-200">
+        <Card className="mb-6 shadow-sm border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardContent className="p-6">
             <div className="flex items-start space-x-4">
-              <div className="hidden sm:flex w-10 h-10 bg-slate-300 rounded-full items-center justify-center">
-                <PlusCircle className="h-5 w-5 text-slate-600" />
+              <div className="hidden sm:flex w-10 h-10 bg-slate-300 dark:bg-gray-600 rounded-full items-center justify-center">
+                <PlusCircle className="h-5 w-5 text-slate-600 dark:text-slate-300" />
               </div>
               <div className="flex-1">
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -220,14 +222,14 @@ export default function MessageBoard() {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Share your thoughts anonymously..."
-                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all duration-200"
+                    className="w-full px-4 py-3 border border-slate-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all duration-200 bg-white dark:bg-gray-700 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-gray-400"
                     rows={3}
                     maxLength={500}
                   />
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
-                      <span className="text-sm text-slate-500">
+                      <span className="text-sm text-slate-500 dark:text-gray-400">
                         {newMessage.length}/500
                       </span>
                     </div>
@@ -256,9 +258,9 @@ export default function MessageBoard() {
 
         {/* Sorting Controls */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-slate-800">Messages</h2>
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-white">Messages</h2>
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-slate-600">Sort by:</span>
+            <span className="text-sm text-slate-600 dark:text-gray-300">Sort by:</span>
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'newest' | 'most_liked' | 'most_commented')}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Select sorting" />

@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowRight, Shield } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import logoImage from "@assets/Screenshot 2025-07-05 at 16.37.55_1751705681308.png";
 
 export default function Login() {
@@ -47,8 +48,11 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
-      <Card className="w-full max-w-md shadow-xl">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-gray-900 relative">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+      <Card className="w-full max-w-md shadow-xl bg-white dark:bg-gray-800 border-slate-200 dark:border-gray-700">
         <CardContent className="pt-8 p-8">
           <div className="text-center mb-8">
             <div className="flex justify-center mx-auto mb-4">
@@ -58,8 +62,8 @@ export default function Login() {
                 className="h-12 w-auto object-contain"
               />
             </div>
-            <h1 className="text-2xl font-bold text-slate-800 mb-2">NS Confessions</h1>
-            <p className="text-slate-600">Enter the NS WiFi password to gain access.</p>
+            <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">NS Confessions</h1>
+            <p className="text-slate-600 dark:text-gray-300">Enter the NS WiFi password to gain access.</p>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
