@@ -58,13 +58,13 @@ export default function Login() {
                 className="h-12 w-auto object-contain"
               />
             </div>
-            <h1 className="text-3xl md:text-2xl font-bold text-slate-800 mb-2">NS Confessions</h1>
-            <p className="text-lg md:text-base text-slate-600">Enter the NS WiFi password.</p>
+            <h1 className="text-2xl font-bold text-slate-800 mb-2">NS Confessions</h1>
+            <p className="text-slate-600">Enter the NS WiFi password to gain access.</p>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-base md:text-sm font-medium text-slate-700">
+              <Label htmlFor="password" className="text-sm font-medium text-slate-700">
                 Password
               </Label>
               <Input
@@ -80,7 +80,7 @@ export default function Login() {
             
             <Button
               type="submit"
-              className="w-full text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 text-lg md:text-base"
+              className="w-full text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2"
               style={{ backgroundColor: '#0f162b', borderColor: '#0f162b' }}
               disabled={isLoading}
             >
@@ -96,7 +96,7 @@ export default function Login() {
           </form>
           
           <div className="mt-6 text-center">
-            <p className="text-sm md:text-xs text-slate-500 flex items-center justify-center">
+            <p className="text-xs text-slate-500 flex items-center justify-center">
               <Shield className="h-3 w-3 mr-1" />
               Your messages are completely anonymous
             </p>
