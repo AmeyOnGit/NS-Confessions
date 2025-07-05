@@ -2,14 +2,17 @@ import {
   messages, 
   comments, 
   likes, 
+  commentLikes,
   rateLimits,
   type Message, 
   type Comment, 
   type Like,
+  type CommentLike,
   type RateLimit,
   type InsertMessage, 
   type InsertComment, 
-  type InsertLike 
+  type InsertLike,
+  type InsertCommentLike
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -17,17 +20,20 @@ import { eq, desc, and } from "drizzle-orm";
 export interface IStorage {
   // Messages
   createMessage(message: InsertMessage): Promise<Message>;
-  getMessages(limit?: number, offset?: number): Promise<Message[]>;
+  getMessages(limit?: number, offset?: number, sortBy?: 'newest' | 'most_liked'): Promise<Message[]>;
   getMessageById(id: number): Promise<Message | undefined>;
   likeMessage(messageId: number): Promise<Message>;
   
   // Comments
   createComment(comment: InsertComment): Promise<Comment>;
   getCommentsByMessageId(messageId: number): Promise<Comment[]>;
+  likeComment(commentId: number): Promise<Comment>;
   
   // Likes
   createLike(like: InsertLike): Promise<Like>;
   hasUserLikedMessage(messageId: number, ipAddress: string): Promise<boolean>;
+  createCommentLike(commentLike: InsertCommentLike): Promise<CommentLike>;
+  hasUserLikedComment(commentId: number, ipAddress: string): Promise<boolean>;
   
   // Rate limiting
   canUserPostMessage(ipAddress: string): Promise<boolean>;
@@ -68,11 +74,16 @@ export class MemStorage implements IStorage {
     return message;
   }
 
-  async getMessages(limit: number = 20, offset: number = 0): Promise<Message[]> {
-    const allMessages = Array.from(this.messages.values())
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .slice(offset, offset + limit);
-    return allMessages;
+  async getMessages(limit: number = 20, offset: number = 0, sortBy: 'newest' | 'most_liked' = 'newest'): Promise<Message[]> {
+    const allMessages = Array.from(this.messages.values());
+    
+    if (sortBy === 'most_liked') {
+      allMessages.sort((a, b) => b.likes - a.likes);
+    } else {
+      allMessages.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    }
+    
+    return allMessages.slice(offset, offset + limit);
   }
 
   async getMessageById(id: number): Promise<Message | undefined> {
@@ -99,6 +110,7 @@ export class MemStorage implements IStorage {
       isBot: insertComment.isBot || false,
       botName: insertComment.botName || null,
       createdAt: new Date(),
+      likes: 0,
     };
     this.comments.set(id, comment);
     return comment;
@@ -124,6 +136,33 @@ export class MemStorage implements IStorage {
   async hasUserLikedMessage(messageId: number, ipAddress: string): Promise<boolean> {
     return Array.from(this.likes.values())
       .some(like => like.messageId === messageId && like.ipAddress === ipAddress);
+  }
+
+  async likeComment(commentId: number): Promise<Comment> {
+    const comment = this.comments.get(commentId);
+    if (!comment) {
+      throw new Error("Comment not found");
+    }
+    
+    const updatedComment = { ...comment, likes: comment.likes + 1 };
+    this.comments.set(commentId, updatedComment);
+    return updatedComment;
+  }
+
+  async createCommentLike(insertCommentLike: InsertCommentLike): Promise<CommentLike> {
+    // For MemStorage, we'll create a simple implementation
+    const id = this.currentLikeId++; // Reuse like ID counter
+    const commentLike: CommentLike = {
+      id,
+      commentId: insertCommentLike.commentId,
+      ipAddress: insertCommentLike.ipAddress,
+    };
+    return commentLike;
+  }
+
+  async hasUserLikedComment(commentId: number, ipAddress: string): Promise<boolean> {
+    // For MemStorage, we'll always return false for simplicity
+    return false;
   }
 
   async canUserPostMessage(ipAddress: string): Promise<boolean> {
@@ -179,11 +218,13 @@ export class DatabaseStorage implements IStorage {
     return message;
   }
 
-  async getMessages(limit: number = 20, offset: number = 0): Promise<Message[]> {
+  async getMessages(limit: number = 20, offset: number = 0, sortBy: 'newest' | 'most_liked' = 'newest'): Promise<Message[]> {
+    const orderBy = sortBy === 'most_liked' ? desc(messages.likes) : desc(messages.createdAt);
+    
     const allMessages = await db
       .select()
       .from(messages)
-      .orderBy(desc(messages.createdAt))
+      .orderBy(orderBy)
       .limit(limit)
       .offset(offset);
     
@@ -235,6 +276,27 @@ export class DatabaseStorage implements IStorage {
       .orderBy((comments) => comments.createdAt);
   }
 
+  async likeComment(commentId: number): Promise<Comment> {
+    // First get the current comment
+    const [currentComment] = await db
+      .select()
+      .from(comments)
+      .where(eq(comments.id, commentId));
+    
+    if (!currentComment) {
+      throw new Error("Comment not found");
+    }
+    
+    // Update with incremented likes
+    const [updatedComment] = await db
+      .update(comments)
+      .set({ likes: currentComment.likes + 1 })
+      .where(eq(comments.id, commentId))
+      .returning();
+    
+    return updatedComment;
+  }
+
   async createLike(insertLike: InsertLike): Promise<Like> {
     const [like] = await db
       .insert(likes)
@@ -250,6 +312,26 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(likes.messageId, messageId),
         eq(likes.ipAddress, ipAddress)
+      ));
+    
+    return !!existingLike;
+  }
+
+  async createCommentLike(insertCommentLike: InsertCommentLike): Promise<CommentLike> {
+    const [commentLike] = await db
+      .insert(commentLikes)
+      .values(insertCommentLike)
+      .returning();
+    return commentLike;
+  }
+
+  async hasUserLikedComment(commentId: number, ipAddress: string): Promise<boolean> {
+    const [existingLike] = await db
+      .select()
+      .from(commentLikes)
+      .where(and(
+        eq(commentLikes.commentId, commentId),
+        eq(commentLikes.ipAddress, ipAddress)
       ));
     
     return !!existingLike;

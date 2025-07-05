@@ -22,6 +22,10 @@ import {
   User,
   UserX
 } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 interface Comment {
   id: number;
@@ -30,6 +34,7 @@ interface Comment {
   createdAt: string;
   isBot: boolean;
   botName?: string;
+  likes: number;
 }
 
 interface CommentSectionProps {
@@ -37,6 +42,9 @@ interface CommentSectionProps {
 }
 
 export function CommentSection({ comments }: CommentSectionProps) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -47,6 +55,22 @@ export function CommentSection({ comments }: CommentSectionProps) {
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
     return `${Math.floor(diffInSeconds / 86400)} days ago`;
   };
+
+  const likeCommentMutation = useMutation({
+    mutationFn: async (commentId: number) => {
+      return await apiRequest('POST', `/api/comments/${commentId}/like`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to like comment",
+        variant: "destructive",
+      });
+    },
+  });
 
   const getAnonymousName = (commentId: number) => {
     const names = [
@@ -138,7 +162,17 @@ export function CommentSection({ comments }: CommentSectionProps) {
                   <span className="text-sm font-medium text-slate-800">{getAnonymousName(comment.id)}</span>
                   <span className="text-xs text-slate-500">{formatTimeAgo(comment.createdAt)}</span>
                 </div>
-                <p className="text-slate-700 text-sm whitespace-pre-wrap">{comment.content}</p>
+                <p className="text-slate-700 text-sm whitespace-pre-wrap mb-2">{comment.content}</p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => likeCommentMutation.mutate(comment.id)}
+                  className="flex items-center space-x-1 text-slate-500 hover:text-red-500 transition-colors p-0 h-auto"
+                  disabled={likeCommentMutation.isPending}
+                >
+                  <Heart className="h-3 w-3" />
+                  <span className="text-xs">{comment.likes}</span>
+                </Button>
               </div>
             </div>
           )}

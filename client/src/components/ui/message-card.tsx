@@ -42,6 +42,7 @@ interface Comment {
   createdAt: string;
   isBot: boolean;
   botName?: string;
+  likes: number;
 }
 
 interface Message {

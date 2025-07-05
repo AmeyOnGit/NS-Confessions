@@ -33,11 +33,13 @@ interface Comment {
   createdAt: string;
   isBot: boolean;
   botName?: string;
+  likes: number;
 }
 
 export default function MessageBoard() {
   const [, setLocation] = useLocation();
   const [newMessage, setNewMessage] = useState("");
+  const [sortBy, setSortBy] = useState<'newest' | 'most_liked'>('newest');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { connect, disconnect, onMessage, isConnected } = useWebSocket();
@@ -67,7 +69,7 @@ export default function MessageBoard() {
           });
           break;
         case 'message_liked':
-          queryClient.setQueryData(['messages'], (old: Message[] | undefined) => {
+          queryClient.setQueryData(['/api/messages', sortBy], (old: Message[] | undefined) => {
             return old?.map(msg => 
               msg.id === data.messageId 
                 ? { ...msg, likes: data.likes }
@@ -76,7 +78,7 @@ export default function MessageBoard() {
           });
           break;
         case 'new_comment':
-          queryClient.setQueryData(['messages'], (old: Message[] | undefined) => {
+          queryClient.setQueryData(['/api/messages', sortBy], (old: Message[] | undefined) => {
             return old?.map(msg => 
               msg.id === data.comment.messageId
                 ? { 
@@ -86,6 +88,18 @@ export default function MessageBoard() {
                   }
                 : msg
             );
+          });
+          break;
+        case 'comment_liked':
+          queryClient.setQueryData(['/api/messages', sortBy], (old: Message[] | undefined) => {
+            return old?.map(msg => ({
+              ...msg,
+              comments: msg.comments.map(comment =>
+                comment.id === data.commentId
+                  ? { ...comment, likes: data.likes }
+                  : comment
+              )
+            }));
           });
           break;
       }
@@ -98,7 +112,14 @@ export default function MessageBoard() {
 
   // Fetch messages
   const { data: messages = [], isLoading } = useQuery<Message[]>({
-    queryKey: ['/api/messages'],
+    queryKey: ['/api/messages', sortBy],
+    queryFn: async () => {
+      const response = await fetch(`/api/messages?sortBy=${sortBy}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch messages');
+      }
+      return response.json() as Promise<Message[]>;
+    },
     refetchInterval: 30000, // Fallback polling every 30 seconds
   });
 
@@ -230,6 +251,30 @@ export default function MessageBoard() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Sorting Controls */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-semibold text-slate-800">Messages</h2>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-slate-600">Sort by:</span>
+            <Button
+              variant={sortBy === 'newest' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSortBy('newest')}
+              className="text-sm"
+            >
+              Newest
+            </Button>
+            <Button
+              variant={sortBy === 'most_liked' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSortBy('most_liked')}
+              className="text-sm"
+            >
+              Most Liked
+            </Button>
+          </div>
+        </div>
 
         {/* Messages */}
         <div className="space-y-4">

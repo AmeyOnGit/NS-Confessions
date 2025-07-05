@@ -173,8 +173,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const limit = parseInt(req.query.limit as string) || 20;
       const offset = parseInt(req.query.offset as string) || 0;
+      const sortBy = (req.query.sortBy as 'newest' | 'most_liked') || 'newest';
       
-      const messages = await storage.getMessages(limit, offset);
+      const messages = await storage.getMessages(limit, offset, sortBy);
       
       // Get comments for each message
       const messagesWithComments = await Promise.all(
@@ -348,6 +349,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching comments:', error);
       res.status(500).json({ error: 'Failed to fetch comments' });
+    }
+  });
+
+  // Like a comment
+  app.post('/api/comments/:id/like', async (req, res) => {
+    try {
+      const commentId = parseInt(req.params.id);
+      const ipAddress = getClientIP(req);
+      
+      // Check if user already liked this comment
+      const hasLiked = await storage.hasUserLikedComment(commentId, ipAddress);
+      if (hasLiked) {
+        return res.status(400).json({ error: 'You have already liked this comment' });
+      }
+      
+      // Create like record
+      await storage.createCommentLike({
+        commentId,
+        ipAddress
+      });
+      
+      // Update comment likes count
+      const updatedComment = await storage.likeComment(commentId);
+      
+      // Broadcast comment like update to all clients
+      broadcast({
+        type: 'comment_liked',
+        commentId,
+        likes: updatedComment.likes
+      });
+      
+      res.json(updatedComment);
+    } catch (error) {
+      console.error('Error liking comment:', error);
+      res.status(500).json({ error: 'Failed to like comment' });
     }
   });
 
