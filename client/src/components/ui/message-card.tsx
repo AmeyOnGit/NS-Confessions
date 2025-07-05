@@ -11,7 +11,27 @@ import {
   Clock, 
   KeyRound,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  User,
+  UserX,
+  Ghost,
+  Eye,
+  Zap,
+  Star,
+  Crown,
+  Feather,
+  Sparkles,
+  Moon,
+  Sun,
+  Coffee,
+  Lightbulb,
+  Music,
+  Camera,
+  Heart as HeartIcon,
+  Flame,
+  Snowflake,
+  Leaf,
+  Waves
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -117,16 +137,57 @@ export function MessageCard({ message }: MessageCardProps) {
     return colors[message.id % colors.length];
   };
 
+  const getAnonymousName = () => {
+    const names = [
+      'Midnight Wanderer',
+      'Neon Dreamer',
+      'Silent Observer',
+      'Cosmic Thinker',
+      'Urban Ghost',
+      'Digital Nomad',
+      'Velvet Voice',
+      'Shadow Dancer',
+      'Electric Soul',
+      'Moonlight Scribe',
+      'Starlight Poet',
+      'Thunder Whisperer',
+      'Ocean Mystic',
+      'Forest Sage',
+      'Crystal Gazer',
+      'Night Owl',
+      'Dawn Chaser',
+      'Storm Rider',
+      'Fire Walker',
+      'Ice Breaker',
+      'Cloud Surfer',
+      'Wind Runner',
+      'Light Bender',
+      'Time Keeper',
+      'Dream Weaver'
+    ];
+    return names[message.id % names.length];
+  };
+
+  const getIcon = () => {
+    const icons = [
+      Ghost, Star, Moon, Sun, Zap, Crown, Feather, Sparkles, 
+      Eye, Coffee, Lightbulb, Music, Camera, HeartIcon, Flame, 
+      Snowflake, Leaf, Waves, User, UserX
+    ];
+    const IconComponent = icons[message.id % icons.length];
+    return <IconComponent className={`h-5 w-5 ${getIconColor()}`} />;
+  };
+
   return (
     <Card className="shadow-sm border border-slate-200 transition-all duration-200 hover:shadow-md">
       <CardContent className="p-6">
         <div className="flex items-start space-x-4">
           <div className={`w-10 h-10 ${getBgColor()} rounded-full flex items-center justify-center`}>
-            <KeyRound className={`h-5 w-5 ${getIconColor()}`} />
+            {getIcon()}
           </div>
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-3">
-              <span className="text-sm font-medium text-slate-800">Anonymous</span>
+              <span className="text-sm font-medium text-slate-800">{getAnonymousName()}</span>
               <span className="text-xs text-slate-500">{formatTimeAgo(message.createdAt)}</span>
               {Date.now() - new Date(message.createdAt).getTime() < 300000 && (
                 <span className="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-full">
@@ -178,8 +239,8 @@ export function MessageCard({ message }: MessageCardProps) {
                 
                 {/* Add Comment Form */}
                 <form onSubmit={handleComment} className="flex items-start space-x-3 mt-4">
-                  <div className="w-8 h-8 bg-slate-300 rounded-full flex items-center justify-center">
-                    <KeyRound className="h-4 w-4 text-slate-600" />
+                  <div className={`w-8 h-8 ${getBgColor()} rounded-full flex items-center justify-center`}>
+                    {getIcon()}
                   </div>
                   <div className="flex-1">
                     <Textarea

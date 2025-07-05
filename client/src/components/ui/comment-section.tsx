@@ -1,4 +1,27 @@
-import { Bot, KeyRound, Sparkles } from "lucide-react";
+import { 
+  Bot, 
+  KeyRound, 
+  Sparkles, 
+  Ghost,
+  Star,
+  Moon,
+  Sun,
+  Zap,
+  Crown,
+  Feather,
+  Eye,
+  Coffee,
+  Lightbulb,
+  Music,
+  Camera,
+  Heart,
+  Flame,
+  Snowflake,
+  Leaf,
+  Waves,
+  User,
+  UserX
+} from "lucide-react";
 
 interface Comment {
   id: number;
@@ -23,6 +46,56 @@ export function CommentSection({ comments }: CommentSectionProps) {
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
     return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  };
+
+  const getAnonymousName = (commentId: number) => {
+    const names = [
+      'Whisper Walker',
+      'Night Watcher',
+      'Secret Keeper',
+      'Phantom Writer',
+      'Shadow Sage',
+      'Mystic Voice',
+      'Anonymous Angel',
+      'Hidden Truth',
+      'Quiet Storm',
+      'Invisible Ink',
+      'Echo Chamber',
+      'Masked Marvel',
+      'Silent Speaker',
+      'Cryptic Curator',
+      'Faceless Friend',
+      'Unnamed Hero',
+      'Blank Canvas',
+      'Hollow Heart',
+      'Empty Echo',
+      'Void Voice',
+      'Nameless Knight',
+      'Ghostly Guide',
+      'Spectral Scribe',
+      'Phantom Philosopher',
+      'Shadow Storyteller'
+    ];
+    return names[commentId % names.length];
+  };
+
+  const getCommentIcon = (commentId: number) => {
+    const icons = [
+      Ghost, Star, Moon, Sun, Zap, Crown, Feather, 
+      Eye, Coffee, Lightbulb, Music, Camera, Heart, 
+      Flame, Snowflake, Leaf, Waves, User, UserX
+    ];
+    return icons[commentId % icons.length];
+  };
+
+  const getBgColor = (commentId: number) => {
+    const colors = ['bg-indigo-100', 'bg-purple-100', 'bg-green-100', 'bg-blue-100', 'bg-pink-100', 'bg-yellow-100', 'bg-red-100'];
+    return colors[commentId % colors.length];
+  };
+
+  const getIconColor = (commentId: number) => {
+    const colors = ['text-indigo-600', 'text-purple-600', 'text-green-600', 'text-blue-600', 'text-pink-600', 'text-yellow-600', 'text-red-600'];
+    return colors[commentId % colors.length];
   };
 
   return (
@@ -54,12 +127,15 @@ export function CommentSection({ comments }: CommentSectionProps) {
           ) : (
             // User Comment
             <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-slate-300 rounded-full flex items-center justify-center">
-                <KeyRound className="h-4 w-4 text-slate-600" />
+              <div className={`w-8 h-8 ${getBgColor(comment.id)} rounded-full flex items-center justify-center`}>
+                {(() => {
+                  const IconComponent = getCommentIcon(comment.id);
+                  return <IconComponent className={`h-4 w-4 ${getIconColor(comment.id)}`} />;
+                })()}
               </div>
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-2">
-                  <span className="text-sm font-medium text-slate-800">Anonymous</span>
+                  <span className="text-sm font-medium text-slate-800">{getAnonymousName(comment.id)}</span>
                   <span className="text-xs text-slate-500">{formatTimeAgo(comment.createdAt)}</span>
                 </div>
                 <p className="text-slate-700 text-sm whitespace-pre-wrap">{comment.content}</p>
