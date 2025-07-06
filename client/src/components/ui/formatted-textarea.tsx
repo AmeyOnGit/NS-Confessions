@@ -127,7 +127,10 @@ export function FormattedTextarea({
 
   const handleInput = () => {
     if (editorRef.current) {
-      const markdownText = convertToMarkdown(editorRef.current.innerHTML);
+      const html = editorRef.current.innerHTML;
+      const markdownText = convertToMarkdown(html);
+      console.log('HTML:', html);
+      console.log('Markdown:', markdownText);
       if (markdownText.length <= maxLength) {
         onChange(markdownText);
       }

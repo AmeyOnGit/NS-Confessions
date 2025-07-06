@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Text Formatting</title>
+</head>
+<body>
+    <h1>Test Markdown Parsing</h1>
+    <div id="test-output"></div>
+    
+    <script>
+        // Test markdown patterns
+        const testText = "This is **bold text** and this is *italic text* and this is __underlined text__.";
+        
+        // Test regex patterns from text-parser
+        const BOLD_REGEX = /\*\*(.*?)\*\*/g;
+        const ITALIC_REGEX = /\*(.*?)\*/g;
+        const UNDERLINE_REGEX = /__(.*?)__/g;
+        
+        console.log("Original text:", testText);
+        console.log("Bold matches:", testText.match(BOLD_REGEX));
+        console.log("Italic matches:", testText.match(ITALIC_REGEX));
+        console.log("Underline matches:", testText.match(UNDERLINE_REGEX));
+        
+        // Test replacement
+        let processedText = testText;
+        processedText = processedText.replace(BOLD_REGEX, '<strong>$1</strong>');
+        processedText = processedText.replace(ITALIC_REGEX, '<em>$1</em>');
+        processedText = processedText.replace(UNDERLINE_REGEX, '<u>$1</u>');
+        
+        console.log("Processed text:", processedText);
+        
+        document.getElementById('test-output').innerHTML = processedText;
+    </script>
+</body>
+</html>
