@@ -187,7 +187,7 @@ export function CommentSection({ comments, isAdmin = false }: CommentSectionProp
               <div className="flex-1 flex items-start justify-between">
                 <div className="flex-1 pr-3">
                   <div className="mb-2">
-                    <span className="text-base md:text-sm font-medium text-slate-800">{getAnonymousName(comment.id)}</span>
+                    <span className="text-lg md:text-base font-medium text-slate-800">{getAnonymousName(comment.id)}</span>
                     {!comment.isBot && (
                       <div className="block md:inline md:ml-2">
                         <span className="text-sm md:text-xs text-slate-500">{formatTimeAgo(comment.createdAt)}</span>

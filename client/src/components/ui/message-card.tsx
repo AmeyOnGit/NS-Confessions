@@ -236,7 +236,7 @@ export function MessageCard({ message, isAdmin = false }: MessageCardProps) {
           </div>
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-3">
-              <span className="text-base md:text-sm font-medium text-slate-800">{getAnonymousName()}</span>
+              <span className="text-lg md:text-base font-medium text-slate-800">{getAnonymousName()}</span>
               <span className="text-sm md:text-xs text-slate-500">{formatTimeAgo(message.createdAt)}</span>
               {Date.now() - new Date(message.createdAt).getTime() < 300000 && (
                 <span className="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-full">
