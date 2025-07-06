@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { FormattedTextarea } from "@/components/ui/formatted-textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useWebSocket } from "@/lib/websocket";
@@ -260,21 +261,17 @@ export default function MessageBoard() {
               </div>
               <div className="flex-1">
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <Textarea
+                  <FormattedTextarea
                     value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
+                    onChange={setNewMessage}
                     placeholder="Forgive me Father for I have sinned..."
-                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all duration-200"
+                    className="w-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all duration-200"
                     rows={3}
                     maxLength={500}
                   />
                   
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <span className="text-sm text-slate-500">
-                        {newMessage.length}/500
-                      </span>
-                    </div>
+                    <div className="flex-1"></div>
                     
                     <Button
                       type="submit"

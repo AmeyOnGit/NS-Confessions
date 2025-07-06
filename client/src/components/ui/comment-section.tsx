@@ -28,6 +28,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { parseTextContent } from "@/lib/text-parser";
 
 interface Comment {
   id: number;
@@ -193,7 +194,7 @@ export function CommentSection({ comments, isAdmin = false }: CommentSectionProp
                       </div>
                     )}
                   </div>
-                  <p className="text-slate-700 text-base md:text-sm whitespace-pre-wrap">{comment.content}</p>
+                  <div className="text-slate-700 text-base md:text-sm whitespace-pre-wrap">{parseTextContent(comment.content)}</div>
                 </div>
                 <div className="flex items-center space-x-2 flex-shrink-0">
                   <Button

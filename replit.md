@@ -105,6 +105,13 @@ Changelog:
   - Fixed WebSocket query cache mismatch issues
   - Changed comment button color to #0f162b
   - Reduced message card padding for better spacing
+- July 06, 2025. Enhanced message system:
+  - Implemented one-like-per-login restriction with session tracking
+  - Added automatic URL hyperlinking in messages and comments
+  - Added text formatting options (bold, italic, bold+italic) with markdown syntax
+  - Created formatted textarea component with formatting toolbar
+  - Updated message from void text to use "honesty" instead of "vulnerability"
+  - Simplified error messages for duplicate likes
 ```
 
 ## User Preferences
