@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Bold, Italic } from "lucide-react";
+import { Bold, Italic, Underline } from "lucide-react";
 
 interface FormattedTextareaProps {
   value: string;
@@ -22,6 +22,7 @@ export function FormattedTextarea({
   const editorRef = useRef<HTMLDivElement>(null);
   const [isBoldActive, setIsBoldActive] = useState(false);
   const [isItalicActive, setIsItalicActive] = useState(false);
+  const [isUnderlineActive, setIsUnderlineActive] = useState(false);
 
   // Convert markdown to HTML for display
   const convertToHtml = (text: string): string => {
@@ -29,6 +30,7 @@ export function FormattedTextarea({
       .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/__(.*?)__/g, '<u>$1</u>')
       .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">$1</a>');
   };
 
@@ -38,6 +40,7 @@ export function FormattedTextarea({
       .replace(/<strong><em>(.*?)<\/em><\/strong>/g, '***$1***')
       .replace(/<strong>(.*?)<\/strong>/g, '**$1**')
       .replace(/<em>(.*?)<\/em>/g, '*$1*')
+      .replace(/<u>(.*?)<\/u>/g, '__$1__')
       .replace(/<a[^>]*>(.*?)<\/a>/g, '$1')
       .replace(/<[^>]+>/g, '')
       .replace(/&nbsp;/g, ' ');
@@ -78,12 +81,13 @@ export function FormattedTextarea({
     }
   };
 
-  const handleFormatting = (format: 'bold' | 'italic') => {
+  const handleFormatting = (format: 'bold' | 'italic' | 'underline') => {
     document.execCommand(format, false);
     
     // Update active states
     setIsBoldActive(document.queryCommandState('bold'));
     setIsItalicActive(document.queryCommandState('italic'));
+    setIsUnderlineActive(document.queryCommandState('underline'));
     
     // Update the value
     handleInput();
@@ -107,6 +111,7 @@ export function FormattedTextarea({
     // Update button states when editor gains focus
     setIsBoldActive(document.queryCommandState('bold'));
     setIsItalicActive(document.queryCommandState('italic'));
+    setIsUnderlineActive(document.queryCommandState('underline'));
   };
 
   const handleSelectionChange = () => {
@@ -114,6 +119,7 @@ export function FormattedTextarea({
     if (editorRef.current?.contains(document.activeElement)) {
       setIsBoldActive(document.queryCommandState('bold'));
       setIsItalicActive(document.queryCommandState('italic'));
+      setIsUnderlineActive(document.queryCommandState('underline'));
     }
   };
 
@@ -160,6 +166,16 @@ export function FormattedTextarea({
           title="Italic"
         >
           <Italic className="h-3 w-3" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => handleFormatting('underline')}
+          className={`h-6 w-6 p-0 hover:bg-slate-200 ${isUnderlineActive ? 'bg-slate-200' : ''}`}
+          title="Underline"
+        >
+          <Underline className="h-3 w-3" />
         </Button>
       </div>
     </div>

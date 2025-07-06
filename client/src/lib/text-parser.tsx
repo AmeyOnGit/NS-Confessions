@@ -7,6 +7,7 @@ const URL_REGEX = /(https?:\/\/[^\s]+)/g;
 const BOLD_REGEX = /\*\*(.*?)\*\*/g;
 const ITALIC_REGEX = /\*(.*?)\*/g;
 const BOLD_ITALIC_REGEX = /\*\*\*(.*?)\*\*\*/g;
+const UNDERLINE_REGEX = /__(.*?)__/g;
 
 export function parseTextContent(text: string): React.ReactNode[] {
   const elements: React.ReactNode[] = [];
@@ -89,6 +90,16 @@ function parseFormattedText(text: string, startKey: number): React.ReactNode[] {
       <em key={currentKey++} className="italic">
         {content}
       </em>
+    );
+    return `__ELEMENT_${elements.length - 1}__`;
+  });
+  
+  // Replace underline
+  processedText = processedText.replace(UNDERLINE_REGEX, (match, content) => {
+    elements.push(
+      <u key={currentKey++} className="underline">
+        {content}
+      </u>
     );
     return `__ELEMENT_${elements.length - 1}__`;
   });
