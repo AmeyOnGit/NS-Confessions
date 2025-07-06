@@ -139,7 +139,7 @@ export function FormattedTextarea({
         onInput={handleInput}
         onKeyDown={handleKeyDown}
         onFocus={handleFocus}
-        className={`w-full px-4 py-3 border border-slate-300 rounded-t-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all duration-200 ${className}`}
+        className={`w-full px-4 py-3 border border-slate-300 rounded-t-lg focus:outline-none resize-none transition-all duration-200 ${className}`}
         style={{ minHeight: `${minHeight}px` }}
         data-placeholder={placeholder}
         suppressContentEditableWarning={true}
