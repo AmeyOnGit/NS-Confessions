@@ -101,7 +101,7 @@ export function FormattedTextarea({
         placeholder={placeholder}
         maxLength={maxLength}
         rows={rows}
-        className={`w-full px-4 py-3 border border-slate-300 rounded-t-lg focus:outline-none resize-none transition-all duration-200 ${className}`}
+        className={`w-full px-4 py-3 border border-slate-300 rounded-t-lg focus:outline-none resize-none transition-all duration-200 border-b-0 ${className}`}
         style={{ minHeight: `${minHeight}px` }}
       />
 
