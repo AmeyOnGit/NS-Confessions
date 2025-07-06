@@ -194,7 +194,7 @@ export function CommentSection({ comments, isAdmin = false }: CommentSectionProp
                       </div>
                     )}
                   </div>
-                  <div className="text-slate-700 text-base md:text-sm whitespace-pre-wrap">{parseTextContent(comment.content)}</div>
+                  <div className="text-slate-700 text-lg md:text-base whitespace-pre-wrap">{parseTextContent(comment.content)}</div>
                 </div>
                 <div className="flex items-center space-x-2 flex-shrink-0">
                   <Button
