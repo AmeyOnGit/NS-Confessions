@@ -10,7 +10,7 @@ const PASSWORD = "darktalent2024!";
 const ADMIN_PASSWORD = "admin";
 
 // Store valid admin sessions with expiration
-const adminSessions = new Map<string, { expires: number }>>();
+const adminSessions = new Map();
 
 // Clean up expired sessions every hour
 setInterval(() => {
@@ -32,7 +32,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // WebSocket server for real-time updates
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
   
-  const clients = new Set<WebSocketClient>();
+  const clients = new Set();
   
   wss.on('connection', (ws: WebSocketClient) => {
     console.log('New WebSocket connection');
