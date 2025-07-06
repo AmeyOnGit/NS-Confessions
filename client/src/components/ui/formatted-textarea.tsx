@@ -19,7 +19,7 @@ export function FormattedTextarea({
   rows = 3,
   className = ""
 }: FormattedTextareaProps) {
-  const editorRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
   const [isBoldActive, setIsBoldActive] = useState(false);
   const [isItalicActive, setIsItalicActive] = useState(false);
   const [isUnderlineActive, setIsUnderlineActive] = useState(false);
@@ -51,58 +51,100 @@ export function FormattedTextarea({
   const handleFormatting = (format: 'bold' | 'italic' | 'underline') => {
     if (!editorRef.current) return;
     
-    const textarea = editorRef.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = value.substring(start, end);
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
     
+    const range = selection.getRangeAt(0);
+    if (!editorRef.current.contains(range.commonAncestorContainer)) return;
+    
+    const selectedText = selection.toString();
     if (!selectedText) return;
     
-    let formattedText = '';
-    switch (format) {
-      case 'bold':
-        formattedText = `**${selectedText}**`;
-        break;
-      case 'italic':
-        formattedText = `*${selectedText}*`;
-        break;
-      case 'underline':
-        formattedText = `__${selectedText}__`;
-        break;
-    }
+    // Apply formatting using execCommand for true WYSIWYG
+    document.execCommand(format, false);
     
-    const newValue = value.substring(0, start) + formattedText + value.substring(end);
-    onChange(newValue);
+    // Update active states
+    setIsBoldActive(document.queryCommandState('bold'));
+    setIsItalicActive(document.queryCommandState('italic'));
+    setIsUnderlineActive(document.queryCommandState('underline'));
     
-    // Restore cursor position after formatting
+    // Convert to markdown and update value
     setTimeout(() => {
-      if (textarea) {
-        const newCursorPos = start + formattedText.length;
-        textarea.setSelectionRange(newCursorPos, newCursorPos);
-        textarea.focus();
+      if (editorRef.current) {
+        const markdownText = convertToMarkdown(editorRef.current.innerHTML);
+        onChange(markdownText);
       }
     }, 0);
   };
 
-  const handleFocus = () => {
-    // Simple focus handler - no special logic needed for textarea
+  const handleInput = () => {
+    if (editorRef.current) {
+      const markdownText = convertToMarkdown(editorRef.current.innerHTML);
+      if (markdownText.length <= maxLength) {
+        onChange(markdownText);
+      }
+    }
   };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Handle max length
+    if (editorRef.current && editorRef.current.textContent && 
+        editorRef.current.textContent.length >= maxLength && 
+        !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+      e.preventDefault();
+      return;
+    }
+
+    // Handle Enter key to prevent excessive line breaks
+    if (e.key === 'Enter' && rows <= 2) {
+      e.preventDefault();
+      return;
+    }
+  };
+
+  const handleFocus = () => {
+    // Update button states when editor gains focus
+    setIsBoldActive(document.queryCommandState('bold'));
+    setIsItalicActive(document.queryCommandState('italic'));
+    setIsUnderlineActive(document.queryCommandState('underline'));
+  };
+
+  const handleSelectionChange = () => {
+    // Update button states when selection changes
+    if (editorRef.current?.contains(document.activeElement)) {
+      setIsBoldActive(document.queryCommandState('bold'));
+      setIsItalicActive(document.queryCommandState('italic'));
+      setIsUnderlineActive(document.queryCommandState('underline'));
+    }
+  };
+
+  // Update editor content when value changes
+  useEffect(() => {
+    if (editorRef.current && convertToMarkdown(editorRef.current.innerHTML) !== value) {
+      editorRef.current.innerHTML = convertToHtml(value);
+    }
+  }, [value]);
+
+  useEffect(() => {
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => document.removeEventListener('selectionchange', handleSelectionChange);
+  }, []);
 
   const minHeight = rows * 24; // Approximate line height
 
   return (
     <div className="border border-slate-300 rounded-lg">
       {/* Rich Text Editor */}
-      <textarea
+      <div
         ref={editorRef}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        contentEditable
+        onInput={handleInput}
+        onKeyDown={handleKeyDown}
         onFocus={handleFocus}
-        placeholder={placeholder}
-        maxLength={maxLength}
-        rows={rows}
         className={`w-full px-4 py-3 border-0 rounded-t-lg focus:outline-none resize-none transition-all duration-200 ${className}`}
         style={{ minHeight: `${minHeight}px` }}
+        data-placeholder={placeholder}
+        suppressContentEditableWarning={true}
       />
 
       {/* Formatting Toolbar */}
