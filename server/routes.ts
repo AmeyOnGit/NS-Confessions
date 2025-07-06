@@ -86,7 +86,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (password === PASSWORD) {
       res.json({ success: true, isAdmin: false, sessionId });
     } else if (password === ADMIN_PASSWORD) {
-      res.json({ success: true, isAdmin: true, sessionId });
+      const adminSessionId = 'admin_' + sessionId;
+      res.json({ success: true, isAdmin: true, sessionId: adminSessionId });
     } else {
       res.status(401).json({ error: 'Invalid password' });
     }
@@ -328,8 +329,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin authentication middleware
+  const requireAdmin = (req: any, res: any, next: any) => {
+    const sessionId = req.body.sessionId || req.query.sessionId || req.headers['x-session-id'];
+    
+    // In a real app, you'd verify the session against a database
+    // For this simple app, we'll check if it's an admin session
+    // This is still not secure, but better than nothing
+    const isAdmin = sessionId && sessionId.startsWith('admin_');
+    
+    if (!isAdmin) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    
+    next();
+  };
+
   // Admin-only delete routes
-  app.delete('/api/messages/:id', async (req, res) => {
+  app.delete('/api/messages/:id', requireAdmin, async (req, res) => {
     try {
       const messageId = parseInt(req.params.id);
       await storage.deleteMessage(messageId);
@@ -348,7 +365,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin-only demote message route
-  app.post('/api/messages/:id/demote', async (req, res) => {
+  app.post('/api/messages/:id/demote', requireAdmin, async (req, res) => {
     try {
       const messageId = parseInt(req.params.id);
       const updatedMessage = await storage.demoteMessage(messageId);
@@ -367,7 +384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/comments/:id', async (req, res) => {
+  app.delete('/api/comments/:id', requireAdmin, async (req, res) => {
     try {
       const commentId = parseInt(req.params.id);
       await storage.deleteComment(commentId);
