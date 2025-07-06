@@ -19,7 +19,7 @@ export function FormattedTextarea({
   rows = 3,
   className = ""
 }: FormattedTextareaProps) {
-  const editorRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<HTMLTextAreaElement>(null);
   const [isBoldActive, setIsBoldActive] = useState(false);
   const [isItalicActive, setIsItalicActive] = useState(false);
   const [isUnderlineActive, setIsUnderlineActive] = useState(false);
@@ -46,117 +46,63 @@ export function FormattedTextarea({
       .replace(/&nbsp;/g, ' ');
   };
 
-  // Update editor content when value changes
-  useEffect(() => {
-    if (editorRef.current && editorRef.current.innerHTML !== convertToHtml(value)) {
-      const selection = window.getSelection();
-      const range = selection?.getRangeAt(0);
-      const cursorPosition = range?.startOffset || 0;
-      
-      editorRef.current.innerHTML = convertToHtml(value);
-      
-      // Restore cursor position
-      if (selection && range) {
-        try {
-          const textNode = editorRef.current.firstChild;
-          if (textNode) {
-            range.setStart(textNode, Math.min(cursorPosition, textNode.textContent?.length || 0));
-            range.collapse(true);
-            selection.removeAllRanges();
-            selection.addRange(range);
-          }
-        } catch (e) {
-          // Ignore cursor positioning errors
-        }
-      }
-    }
-  }, [value]);
 
-  const handleInput = () => {
-    if (editorRef.current) {
-      const markdownText = convertToMarkdown(editorRef.current.innerHTML);
-      if (markdownText.length <= maxLength) {
-        onChange(markdownText);
-      }
-    }
-  };
 
   const handleFormatting = (format: 'bold' | 'italic' | 'underline') => {
-    document.execCommand(format, false);
+    if (!editorRef.current) return;
     
-    // Update active states
-    setIsBoldActive(document.queryCommandState('bold'));
-    setIsItalicActive(document.queryCommandState('italic'));
-    setIsUnderlineActive(document.queryCommandState('underline'));
+    const textarea = editorRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = value.substring(start, end);
     
-    // Update the value
-    handleInput();
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    // Handle space key explicitly
-    if (e.key === ' ') {
-      // Check max length before allowing space
-      if (editorRef.current && editorRef.current.textContent && 
-          editorRef.current.textContent.length >= maxLength) {
-        e.preventDefault();
-        return;
+    if (!selectedText) return;
+    
+    let formattedText = '';
+    switch (format) {
+      case 'bold':
+        formattedText = `**${selectedText}**`;
+        break;
+      case 'italic':
+        formattedText = `*${selectedText}*`;
+        break;
+      case 'underline':
+        formattedText = `__${selectedText}__`;
+        break;
+    }
+    
+    const newValue = value.substring(0, start) + formattedText + value.substring(end);
+    onChange(newValue);
+    
+    // Restore cursor position after formatting
+    setTimeout(() => {
+      if (textarea) {
+        const newCursorPos = start + formattedText.length;
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+        textarea.focus();
       }
-      // Allow space to be inserted normally
-      return;
-    }
-
-    // Handle max length - allow navigation keys
-    if (editorRef.current && editorRef.current.textContent && 
-        editorRef.current.textContent.length >= maxLength && 
-        !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
-      e.preventDefault();
-      return;
-    }
-
-    // Handle Enter key to prevent excessive line breaks
-    if (e.key === 'Enter' && rows <= 2) {
-      e.preventDefault();
-      return;
-    }
+    }, 0);
   };
 
   const handleFocus = () => {
-    // Update button states when editor gains focus
-    setIsBoldActive(document.queryCommandState('bold'));
-    setIsItalicActive(document.queryCommandState('italic'));
-    setIsUnderlineActive(document.queryCommandState('underline'));
+    // Simple focus handler - no special logic needed for textarea
   };
-
-  const handleSelectionChange = () => {
-    // Update button states when selection changes
-    if (editorRef.current?.contains(document.activeElement)) {
-      setIsBoldActive(document.queryCommandState('bold'));
-      setIsItalicActive(document.queryCommandState('italic'));
-      setIsUnderlineActive(document.queryCommandState('underline'));
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener('selectionchange', handleSelectionChange);
-    return () => document.removeEventListener('selectionchange', handleSelectionChange);
-  }, []);
 
   const minHeight = rows * 24; // Approximate line height
 
   return (
     <div>
       {/* Rich Text Editor */}
-      <div
+      <textarea
         ref={editorRef}
-        contentEditable
-        onInput={handleInput}
-        onKeyDown={handleKeyDown}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
         onFocus={handleFocus}
+        placeholder={placeholder}
+        maxLength={maxLength}
+        rows={rows}
         className={`w-full px-4 py-3 border border-slate-300 rounded-t-lg focus:outline-none resize-none transition-all duration-200 ${className}`}
         style={{ minHeight: `${minHeight}px` }}
-        data-placeholder={placeholder}
-        suppressContentEditableWarning={true}
       />
 
       {/* Formatting Toolbar */}
