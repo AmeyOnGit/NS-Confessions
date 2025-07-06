@@ -129,6 +129,11 @@ export function FormattedTextarea({
       const markdownText = convertToMarkdown(html);
       console.log('HTML:', html);
       console.log('Markdown:', markdownText);
+      
+      // Test the regex directly
+      const testResult = html.replace(/<(strong|b)[^>]*>(.*?)<\/(strong|b)>/gi, '**$2**');
+      console.log('Regex test result:', testResult);
+      
       if (markdownText.length <= maxLength) {
         onChange(markdownText);
       }
