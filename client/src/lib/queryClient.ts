@@ -7,20 +7,41 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-export async function apiRequest(
-  method: string,
-  url: string,
-  data?: unknown | undefined,
-): Promise<Response> {
-  const res = await fetch(url, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
+export async function apiRequest(method: string, url: string, data?: any) {
+  const sessionId = localStorage.getItem("anonymousboard_session");
 
-  await throwIfResNotOk(res);
-  return res;
+  const options: RequestInit = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+
+  // Always send session ID in headers for security
+  if (sessionId) {
+    options.headers = {
+      ...options.headers,
+      'x-session-id': sessionId
+    };
+  }
+
+  if (data) {
+    if (method === 'GET') {
+      // For GET requests, don't send session in URL anymore
+    } else {
+      // For other requests, still send data in body but not sessionId
+      options.body = JSON.stringify(data);
+    }
+  }
+
+  const response = await fetch(url, options);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Request failed' }));
+    throw new Error(errorData.error || `HTTP ${response.status}`);
+  }
+
+  return response.json();
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

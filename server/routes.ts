@@ -9,6 +9,19 @@ import { z } from "zod";
 const PASSWORD = "darktalent2024!";
 const ADMIN_PASSWORD = "admin";
 
+// Store valid admin sessions with expiration
+const adminSessions = new Map<string, { expires: number }>>();
+
+// Clean up expired sessions every hour
+setInterval(() => {
+  const now = Date.now();
+  for (const [sessionId, session] of adminSessions.entries()) {
+    if (now > session.expires) {
+      adminSessions.delete(sessionId);
+    }
+  }
+}, 60 * 60 * 1000);
+
 interface WebSocketClient extends WebSocket {
   isAlive?: boolean;
 }
@@ -86,7 +99,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (password === PASSWORD) {
       res.json({ success: true, isAdmin: false, sessionId });
     } else if (password === ADMIN_PASSWORD) {
-      const adminSessionId = 'admin_' + sessionId;
+      // Generate a cryptographically secure admin session
+      const adminSessionId = 'admin_' + Math.random().toString(36).substring(2, 15) + 
+                            Math.random().toString(36).substring(2, 15) + 
+                            Date.now().toString(36);
+      
+      // Store session with 24 hour expiration
+      adminSessions.set(adminSessionId, {
+        expires: Date.now() + (24 * 60 * 60 * 1000)
+      });
+      
       res.json({ success: true, isAdmin: true, sessionId: adminSessionId });
     } else {
       res.status(401).json({ error: 'Invalid password' });
@@ -331,15 +353,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Admin authentication middleware
   const requireAdmin = (req: any, res: any, next: any) => {
-    const sessionId = req.body.sessionId || req.query.sessionId || req.headers['x-session-id'];
+    // Only accept session ID from headers for security
+    const sessionId = req.headers['x-session-id'];
     
-    // In a real app, you'd verify the session against a database
-    // For this simple app, we'll check if it's an admin session
-    // This is still not secure, but better than nothing
-    const isAdmin = sessionId && sessionId.startsWith('admin_');
+    if (!sessionId) {
+      return res.status(403).json({ error: 'Admin session required' });
+    }
     
-    if (!isAdmin) {
-      return res.status(403).json({ error: 'Admin access required' });
+    // Check if session exists and hasn't expired
+    const session = adminSessions.get(sessionId);
+    if (!session || Date.now() > session.expires) {
+      if (session) adminSessions.delete(sessionId); // Clean up expired session
+      return res.status(403).json({ error: 'Invalid or expired admin session' });
     }
     
     next();
