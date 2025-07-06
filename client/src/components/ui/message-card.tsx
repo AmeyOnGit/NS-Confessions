@@ -248,7 +248,7 @@ export function MessageCard({ message, isAdmin = false }: MessageCardProps) {
               )}
             </div>
             
-            <div className="text-slate-700 mb-2 leading-relaxed whitespace-pre-wrap text-lg md:text-base">
+            <div className="text-slate-700 mb-2 whitespace-pre-wrap md:text-base text-[17px]">
               {parseTextContent(message.content)}
             </div>
             
