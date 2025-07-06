@@ -94,21 +94,29 @@ export function FormattedTextarea({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    // Handle max length
+    // Handle space key explicitly
+    if (e.key === ' ') {
+      // Check max length before allowing space
+      if (editorRef.current && editorRef.current.textContent && 
+          editorRef.current.textContent.length >= maxLength) {
+        e.preventDefault();
+        return;
+      }
+      // Allow space to be inserted normally
+      return;
+    }
+
+    // Handle max length - allow navigation keys
     if (editorRef.current && editorRef.current.textContent && 
         editorRef.current.textContent.length >= maxLength && 
-        !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' '].includes(e.key)) {
+        !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
       e.preventDefault();
+      return;
     }
 
     // Handle Enter key to prevent excessive line breaks
     if (e.key === 'Enter' && rows <= 2) {
       e.preventDefault();
-    }
-
-    // Ensure space key works
-    if (e.key === ' ' || e.key === 'Space') {
-      // Let the default behavior handle the space
       return;
     }
   };
