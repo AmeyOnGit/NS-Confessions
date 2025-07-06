@@ -129,8 +129,9 @@
   pointer-events: none;
 }
 
-/* Remove focus outline from contentEditable elements */
+/* Remove focus outline from contentEditable elements while keeping border */
 [contenteditable]:focus {
   outline: none !important;
   box-shadow: none !important;
+  border: 1px solid hsl(20, 5.9%, 90%) !important;
 }
