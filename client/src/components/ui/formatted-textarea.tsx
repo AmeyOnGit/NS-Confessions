@@ -166,12 +166,25 @@ export function FormattedTextarea({
     }
   };
 
-  // Update editor content when value changes
+  // Initialize and update editor content when value changes
   useEffect(() => {
-    if (editorRef.current && convertToMarkdown(editorRef.current.innerHTML) !== value) {
-      editorRef.current.innerHTML = convertToHtml(value);
+    if (editorRef.current) {
+      const currentHtml = editorRef.current.innerHTML;
+      const expectedHtml = convertToHtml(value);
+      
+      // Only update if content is different to avoid cursor jumping
+      if (currentHtml !== expectedHtml) {
+        editorRef.current.innerHTML = expectedHtml;
+      }
     }
   }, [value]);
+
+  // Initialize content on mount
+  useEffect(() => {
+    if (editorRef.current && value) {
+      editorRef.current.innerHTML = convertToHtml(value);
+    }
+  }, []);
 
   useEffect(() => {
     document.addEventListener('selectionchange', handleSelectionChange);
