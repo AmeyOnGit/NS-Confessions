@@ -6,9 +6,11 @@ import { Bold, Italic, Underline } from "lucide-react";
 function convertToMarkdown(html: string): string {
   let text = html;
   
-  // Replace HTML tags with markdown - order matters for nested tags
-  text = text.replace(/<(strong|b)[^>]*>(.*?)<\/(strong|b)>/gi, '**$2**');
-  text = text.replace(/<(em|i)[^>]*>(.*?)<\/(em|i)>/gi, '*$2*');
+  // Replace HTML tags with markdown - handle each tag separately
+  text = text.replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**');
+  text = text.replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**');
+  text = text.replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*');
+  text = text.replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*');
   text = text.replace(/<u[^>]*>(.*?)<\/u>/gi, '__$1__');
   
   // Replace line breaks
@@ -127,13 +129,6 @@ export function FormattedTextarea({
     if (editorRef.current) {
       const html = editorRef.current.innerHTML;
       const markdownText = convertToMarkdown(html);
-      console.log('HTML:', html);
-      console.log('Markdown:', markdownText);
-      
-      // Test the regex directly
-      const testResult = html.replace(/<(strong|b)[^>]*>(.*?)<\/(strong|b)>/gi, '**$2**');
-      console.log('Regex test result:', testResult);
-      
       if (markdownText.length <= maxLength) {
         onChange(markdownText);
       }
