@@ -91,7 +91,7 @@ export function FormattedTextarea({
   const minHeight = rows * 24; // Approximate line height
 
   return (
-    <div>
+    <div className="border border-slate-300 rounded-lg">
       {/* Rich Text Editor */}
       <textarea
         ref={editorRef}
@@ -101,12 +101,12 @@ export function FormattedTextarea({
         placeholder={placeholder}
         maxLength={maxLength}
         rows={rows}
-        className={`w-full px-4 py-3 border border-slate-300 rounded-t-lg focus:outline-none resize-none transition-all duration-200 border-b-0 ${className}`}
+        className={`w-full px-4 py-3 border-0 rounded-t-lg focus:outline-none resize-none transition-all duration-200 ${className}`}
         style={{ minHeight: `${minHeight}px` }}
       />
 
       {/* Formatting Toolbar */}
-      <div className="flex items-center space-x-1 p-1 bg-slate-50 rounded-b-lg border border-t-0 border-slate-300">
+      <div className="flex items-center space-x-1 p-1 bg-slate-50 rounded-b-lg border-t border-slate-300">
         <Button
           type="button"
           variant="ghost"
