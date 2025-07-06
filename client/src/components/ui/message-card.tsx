@@ -236,7 +236,7 @@ export function MessageCard({ message, isAdmin = false }: MessageCardProps) {
           </div>
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-3">
-              <span className="text-sm font-medium text-slate-800">{getAnonymousName()}</span>
+              <span className="text-xs font-medium text-slate-800">{getAnonymousName()}</span>
               <span className="text-sm md:text-xs text-slate-500">{formatTimeAgo(message.createdAt)}</span>
               {Date.now() - new Date(message.createdAt).getTime() < 300000 && (
                 <span className="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-medium rounded-full">
@@ -248,7 +248,7 @@ export function MessageCard({ message, isAdmin = false }: MessageCardProps) {
               )}
             </div>
             
-            <div className="text-slate-700 mb-2 whitespace-pre-wrap text-sm">
+            <div className="text-slate-700 mb-2 whitespace-pre-wrap text-xs">
               {parseTextContent(message.content)}
             </div>
             

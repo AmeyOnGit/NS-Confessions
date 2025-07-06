@@ -187,14 +187,14 @@ export function CommentSection({ comments, isAdmin = false }: CommentSectionProp
               <div className="flex-1 flex items-start justify-between">
                 <div className="flex-1 pr-3">
                   <div className="mb-2">
-                    <span className="text-sm font-medium text-slate-800">{getAnonymousName(comment.id)}</span>
+                    <span className="text-xs font-medium text-slate-800">{getAnonymousName(comment.id)}</span>
                     {!comment.isBot && (
                       <div className="block md:inline md:ml-2">
                         <span className="text-sm md:text-xs text-slate-500">{formatTimeAgo(comment.createdAt)}</span>
                       </div>
                     )}
                   </div>
-                  <div className="text-slate-700 text-sm whitespace-pre-wrap">{parseTextContent(comment.content)}</div>
+                  <div className="text-slate-700 text-xs whitespace-pre-wrap">{parseTextContent(comment.content)}</div>
                 </div>
                 <div className="flex items-center space-x-2 flex-shrink-0">
                   <Button
