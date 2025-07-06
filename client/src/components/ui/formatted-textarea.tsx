@@ -2,6 +2,54 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Bold, Italic, Underline } from "lucide-react";
 
+// Convert HTML to markdown format
+function convertToMarkdown(html: string): string {
+  let text = html;
+  
+  // Replace HTML tags with markdown
+  text = text.replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**');
+  text = text.replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**');
+  text = text.replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*');
+  text = text.replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*');
+  text = text.replace(/<u[^>]*>(.*?)<\/u>/gi, '__$1__');
+  
+  // Replace line breaks
+  text = text.replace(/<br\s*\/?>/gi, '\n');
+  text = text.replace(/<div[^>]*>/gi, '\n');
+  text = text.replace(/<\/div>/gi, '');
+  text = text.replace(/<p[^>]*>/gi, '');
+  text = text.replace(/<\/p>/gi, '\n');
+  
+  // Clean up extra whitespace and newlines
+  text = text.replace(/&nbsp;/g, ' ');
+  text = text.replace(/\n\s*\n/g, '\n');
+  text = text.trim();
+  
+  return text;
+}
+
+// Convert markdown to HTML format  
+function convertToHtml(markdown: string): string {
+  let html = markdown;
+  
+  // Handle bold+italic first (***text***)
+  html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  
+  // Handle bold (**text**)
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  
+  // Handle italic (*text*)
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  
+  // Handle underline (__text__)
+  html = html.replace(/__(.*?)__/g, '<u>$1</u>');
+  
+  // Handle line breaks
+  html = html.replace(/\n/g, '<br>');
+  
+  return html;
+}
+
 interface FormattedTextareaProps {
   value: string;
   onChange: (value: string) => void;
