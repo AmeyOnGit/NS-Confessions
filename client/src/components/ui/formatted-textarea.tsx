@@ -126,8 +126,21 @@ export function FormattedTextarea({
 
   return (
     <div>
+      {/* Rich Text Editor */}
+      <div
+        ref={editorRef}
+        contentEditable
+        onInput={handleInput}
+        onKeyDown={handleKeyDown}
+        onFocus={handleFocus}
+        className={`w-full px-4 py-3 border border-slate-300 rounded-t-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all duration-200 ${className}`}
+        style={{ minHeight: `${minHeight}px` }}
+        data-placeholder={placeholder}
+        suppressContentEditableWarning={true}
+      />
+
       {/* Formatting Toolbar */}
-      <div className="flex items-center space-x-1 p-1 bg-slate-50 rounded-t-lg border border-b-0 border-slate-300">
+      <div className="flex items-center space-x-1 p-1 bg-slate-50 rounded-b-lg border border-t-0 border-slate-300">
         <Button
           type="button"
           variant="ghost"
@@ -149,19 +162,6 @@ export function FormattedTextarea({
           <Italic className="h-3 w-3" />
         </Button>
       </div>
-
-      {/* Rich Text Editor */}
-      <div
-        ref={editorRef}
-        contentEditable
-        onInput={handleInput}
-        onKeyDown={handleKeyDown}
-        onFocus={handleFocus}
-        className={`w-full px-4 py-3 border border-slate-300 rounded-b-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all duration-200 ${className}`}
-        style={{ minHeight: `${minHeight}px` }}
-        data-placeholder={placeholder}
-        suppressContentEditableWarning={true}
-      />
     </div>
   );
 }
