@@ -128,3 +128,9 @@
   color: #9ca3af;
   pointer-events: none;
 }
+
+/* Remove focus outline from contentEditable elements */
+[contenteditable]:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
