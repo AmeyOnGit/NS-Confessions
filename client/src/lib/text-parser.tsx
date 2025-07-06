@@ -58,102 +58,57 @@ export function parseTextContent(text: string): React.ReactNode[] {
 }
 
 function parseFormattedText(text: string, startKey: number): React.ReactNode[] {
-  const result: React.ReactNode[] = [];
+  // Simplified approach to avoid TypeScript issues
+  let processedText = text;
   let currentKey = startKey;
-  let remainingText = text;
+  const elements: React.ReactNode[] = [];
   
-  // Process the text looking for formatting patterns
-  const patterns = [
-    { regex: BOLD_ITALIC_REGEX, className: "font-bold italic", tag: "strong" },
-    { regex: BOLD_REGEX, className: "font-bold", tag: "strong" },
-    { regex: ITALIC_REGEX, className: "italic", tag: "em" }
-  ];
+  // Replace bold+italic first
+  processedText = processedText.replace(BOLD_ITALIC_REGEX, (match, content) => {
+    elements.push(
+      <strong key={currentKey++} className="font-bold italic">
+        {content}
+      </strong>
+    );
+    return `__ELEMENT_${elements.length - 1}__`;
+  });
   
-  while (remainingText.length > 0) {
-    let earliestMatch: RegExpExecArray | null = null;
-    let earliestIndex = remainingText.length;
-    let patternIndex = -1;
-    
-    // Find the earliest formatting pattern
-    patterns.forEach((pattern, idx) => {
-      const match = pattern.regex.exec(remainingText);
-      if (match && match.index !== undefined && match.index < earliestIndex) {
-        earliestMatch = match;
-        earliestIndex = match.index;
-        patternIndex = idx;
-        pattern.regex.lastIndex = 0; // Reset regex
+  // Replace bold
+  processedText = processedText.replace(BOLD_REGEX, (match, content) => {
+    elements.push(
+      <strong key={currentKey++} className="font-bold">
+        {content}
+      </strong>
+    );
+    return `__ELEMENT_${elements.length - 1}__`;
+  });
+  
+  // Replace italic
+  processedText = processedText.replace(ITALIC_REGEX, (match, content) => {
+    elements.push(
+      <em key={currentKey++} className="italic">
+        {content}
+      </em>
+    );
+    return `__ELEMENT_${elements.length - 1}__`;
+  });
+  
+  // Split and reconstruct
+  const parts = processedText.split(/(__ELEMENT_\d+__)/);
+  const result: React.ReactNode[] = [];
+  
+  parts.forEach(part => {
+    if (part.startsWith('__ELEMENT_') && part.endsWith('__')) {
+      const index = parseInt(part.match(/\d+/)?.[0] || '0');
+      if (elements[index]) {
+        result.push(elements[index]);
       }
-    });
-    
-    if (earliestMatch && patternIndex !== -1) {
-      // Add text before the match
-      if (earliestIndex > 0) {
-        result.push(remainingText.slice(0, earliestIndex));
-      }
-      
-      // Add the formatted element
-      const pattern = patterns[patternIndex];
-      const content = earliestMatch[1];
-      
-      if (pattern.tag === "strong") {
-        result.push(
-          <strong key={currentKey++} className={pattern.className}>
-            {content}
-          </strong>
-        );
-      } else {
-        result.push(
-          <em key={currentKey++} className={pattern.className}>
-            {content}
-          </em>
-        );
-      }
-      
-      // Continue with remaining text
-      remainingText = remainingText.slice(earliestIndex + earliestMatch[0].length);
-    } else {
-      // No more patterns found, add remaining text
-      if (remainingText) {
-        result.push(remainingText);
-      }
-      break;
+    } else if (part) {
+      result.push(part);
     }
-  }
+  });
   
   return result.length > 0 ? result : [text];
 }
 
-// Helper function to apply formatting to selected text
-export function applyFormatting(
-  text: string,
-  selectionStart: number,
-  selectionEnd: number,
-  format: 'bold' | 'italic' | 'bold-italic'
-): { newText: string; newCursorPos: number } {
-  const selectedText = text.slice(selectionStart, selectionEnd);
-  
-  let formattedText: string;
-  let formatLength: number;
-  
-  switch (format) {
-    case 'bold':
-      formattedText = `**${selectedText}**`;
-      formatLength = 4; // ** on each side
-      break;
-    case 'italic':
-      formattedText = `*${selectedText}*`;
-      formatLength = 2; // * on each side
-      break;
-    case 'bold-italic':
-      formattedText = `***${selectedText}***`;
-      formatLength = 6; // *** on each side
-      break;
-    default:
-      return { newText: text, newCursorPos: selectionEnd };
-  }
-  
-  const newText = text.slice(0, selectionStart) + formattedText + text.slice(selectionEnd);
-  const newCursorPos = selectionEnd + formatLength;
-  
-  return { newText, newCursorPos };
-}
+// This function is no longer needed with the new rich text editor approach

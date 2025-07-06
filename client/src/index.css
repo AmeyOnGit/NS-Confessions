@@ -121,3 +121,10 @@
 .live-indicator {
   animation: pulse 2s infinite;
 }
+
+/* Rich text editor placeholder */
+[contenteditable]:empty:before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
+}
