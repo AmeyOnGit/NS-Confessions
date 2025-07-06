@@ -271,7 +271,11 @@ export default function MessageBoard() {
                   />
                   
                   <div className="flex items-center justify-between">
-                    <div className="flex-1"></div>
+                    <div className="flex items-center space-x-4">
+                      <span className="text-sm text-slate-500">
+                        {newMessage.length}/500
+                      </span>
+                    </div>
                     
                     <Button
                       type="submit"

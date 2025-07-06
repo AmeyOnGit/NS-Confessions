@@ -125,33 +125,29 @@ export function FormattedTextarea({
   const minHeight = rows * 24; // Approximate line height
 
   return (
-    <div className="space-y-2">
+    <div>
       {/* Formatting Toolbar */}
-      <div className="flex items-center space-x-2 p-2 bg-slate-50 rounded-t-lg border border-b-0 border-slate-300">
+      <div className="flex items-center space-x-1 p-1 bg-slate-50 rounded-t-lg border border-b-0 border-slate-300">
         <Button
           type="button"
           variant="ghost"
           size="sm"
           onClick={() => handleFormatting('bold')}
-          className={`h-8 w-8 p-0 hover:bg-slate-200 ${isBoldActive ? 'bg-slate-200' : ''}`}
+          className={`h-6 w-6 p-0 hover:bg-slate-200 ${isBoldActive ? 'bg-slate-200' : ''}`}
           title="Bold"
         >
-          <Bold className="h-4 w-4" />
+          <Bold className="h-3 w-3" />
         </Button>
         <Button
           type="button"
           variant="ghost"
           size="sm"
           onClick={() => handleFormatting('italic')}
-          className={`h-8 w-8 p-0 hover:bg-slate-200 ${isItalicActive ? 'bg-slate-200' : ''}`}
+          className={`h-6 w-6 p-0 hover:bg-slate-200 ${isItalicActive ? 'bg-slate-200' : ''}`}
           title="Italic"
         >
-          <Italic className="h-4 w-4" />
+          <Italic className="h-3 w-3" />
         </Button>
-        <div className="flex-1" />
-        <span className="text-xs text-slate-500">
-          Select text and click formatting buttons
-        </span>
       </div>
 
       {/* Rich Text Editor */}
@@ -166,17 +162,6 @@ export function FormattedTextarea({
         data-placeholder={placeholder}
         suppressContentEditableWarning={true}
       />
-
-      {/* Character Count and Format Help */}
-      <div className="flex justify-between items-center text-xs text-slate-500">
-        <div className="space-x-4">
-          <span>Bold & Italic formatting</span>
-          <span>URLs auto-link</span>
-        </div>
-        <span>{value.length}/{maxLength}</span>
-      </div>
-      
-
     </div>
   );
 }

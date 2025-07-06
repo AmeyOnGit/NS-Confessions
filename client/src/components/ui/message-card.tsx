@@ -324,7 +324,7 @@ export function MessageCard({ message, isAdmin = false }: MessageCardProps) {
                       maxLength={500}
                     />
                     <div className="flex justify-between items-center mt-2">
-                      <span className="text-xs text-slate-500"></span>
+                      <span className="text-xs text-slate-500">{newComment.length}/500</span>
                       <Button
                         type="submit"
                         size="sm"
