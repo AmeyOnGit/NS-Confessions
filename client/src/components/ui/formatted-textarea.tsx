@@ -6,11 +6,9 @@ import { Bold, Italic, Underline } from "lucide-react";
 function convertToMarkdown(html: string): string {
   let text = html;
   
-  // Replace HTML tags with markdown
-  text = text.replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**');
-  text = text.replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**');
-  text = text.replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*');
-  text = text.replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*');
+  // Replace HTML tags with markdown - order matters for nested tags
+  text = text.replace(/<(strong|b)[^>]*>(.*?)<\/(strong|b)>/gi, '**$2**');
+  text = text.replace(/<(em|i)[^>]*>(.*?)<\/(em|i)>/gi, '*$2*');
   text = text.replace(/<u[^>]*>(.*?)<\/u>/gi, '__$1__');
   
   // Replace line breaks
