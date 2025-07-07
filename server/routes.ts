@@ -222,7 +222,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const messageId = parseInt(req.params.id);
       const ipAddress = getClientIP(req);
-      const sessionId = req.body.sessionId;
+      // Accept session ID from both body and headers for backwards compatibility
+      const sessionId = req.body.sessionId || req.headers['x-session-id'];
       
       if (!sessionId) {
         return res.status(400).json({ error: 'Session ID is required' });
@@ -315,7 +316,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const commentId = parseInt(req.params.id);
       const ipAddress = getClientIP(req);
-      const sessionId = req.body.sessionId;
+      // Accept session ID from both body and headers for backwards compatibility
+      const sessionId = req.body.sessionId || req.headers['x-session-id'];
       
       if (!sessionId) {
         return res.status(400).json({ error: 'Session ID is required' });
