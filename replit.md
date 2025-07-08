@@ -112,6 +112,13 @@ Changelog:
   - Created formatted textarea component with formatting toolbar
   - Updated message from void text to use "honesty" instead of "vulnerability"
   - Simplified error messages for duplicate likes
+- July 08, 2025. PWA enhancements:
+  - Added mobile-friendly PWA installation instructions to login page
+  - Instructions automatically detect platform (iOS/Android/Desktop) and show appropriate steps
+  - Added platform-specific install guidance with visual step-by-step instructions
+  - Created PWAInstallInstructions component with dismissable card design
+  - Enhanced PWA setup with proper manifest.json and service worker registration
+  - Installation prompts include benefits: offline support, faster loading, native app experience
 ```
 
 ## User Preferences

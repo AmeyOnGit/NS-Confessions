@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowRight, Shield } from "lucide-react";
 import logoImage from "@assets/Screenshot 2025-07-05 at 16.37.55_1751705681308.png";
+import { PWAInstallInstructions } from "@/components/ui/pwa-install-instructions";
 
 export default function Login() {
   const [password, setPassword] = useState("");
@@ -117,6 +118,8 @@ export default function Login() {
           </div>
         </CardContent>
       </Card>
+      
+      <PWAInstallInstructions />
     </div>
   );
 }
